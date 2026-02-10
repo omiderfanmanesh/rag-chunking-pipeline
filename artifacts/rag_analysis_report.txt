@@ -1,0 +1,136 @@
+Results confirmed. Here are the current numbers and concrete fix hints for each issue:
+
+Current Scorecard
+
+| # | Severity | Issue | Current Value |
+|---|----------|-------|---------------|
+| 1 | CRITICAL | Tokenizer mismatch | +15-25% undercount vs BPE |
+| 2 | CRITICAL | Excessive overlap | 91 pairs >200 chars, max 59.4% |
+| 3 | CRITICAL | Small/stub chunks | 92 (<20 tok), 24 (<10 tok) |
+| 4 | CRITICAL | TOC chunks in index | 17 |
+| 5 | HIGH | Missing section metadata | 526 (34.1%) |
+| 6 | HIGH | N/A pollution | 1165 chunks (75.5%) |
+| 7 | HIGH | Mixed-article chunks | 44 non-TOC |
+| 8 | HIGH | Metadata-dominated chunks | 23 |
+| 9 | MEDIUM | Duplicates | 13 instances |
+| 10 | MEDIUM | Internal sentence repetition | 16 |
+| 11 | MEDIUM | 0-based page indexing | page_start=0 |
+| 12 | MEDIUM | Article metadata mismatch | 3 |
+
+Fix Hints
+
+CRITICAL 1: Tokenizer Mismatch
+
+File: chunking.py
+
+Problem: count_tokens() uses r"\w+|[^\w\s]" which undercounts vs real BPE tokenizers by 15-25%.
+
+Fix options (pick one):
+- Option A (Best): Replace with tiktoken — add tiktoken to dependencies and use:
+  import tiktoken
+  _ENC = tiktoken.encoding_for_model("text-embedding-3-small")  # or your model
+  def count_tokens(text: str) -> int:
+      return len(_ENC.encode(text))
+
+- Option B (No dependency): Keep regex but apply a safety margin — reduce max_tokens from 520 to ~420, and target_tokens from 450 to ~360, so that even with undercount the real token count stays under 512.
+
+- Option C (Compromise): Keep the regex tokenizer but multiply by a correction factor:
+  return int(len(TOKEN_RE.findall(text)) * 1.2)
+
+CRITICAL 2: Excessive Overlap (91 pairs, avg 28.3%)
+
+File: chunking.py, config at pipeline.py (overlap_tokens=80)
+
+Problem: 80-token overlap on 450-token target means ~18% designed overlap, but in practice it reaches 59%.
+
+Fix hints:
+- Reduce overlap_tokens from 80 to 30-40.
+- Add sentence-boundary snapping in split_text_by_tokens().
+- Add a post-processing dedup step for consecutive chunk pairs with excessive overlap.
+
+CRITICAL 3: Small/Stub Chunks (92 chunks)
+
+File: src/rag_chunker/pipeline.py (_merge_small_segments)
+
+Problem: _merge_small_segments only merges with the next chunk if they share the same structure (_same_structure). Standalone headings that start a new section cannot merge backwards.
+
+Fix hints:
+- Increase SMALL_SEGMENT_TOKEN_THRESHOLD from 20 to 40-50.
+- Relax _same_structure for very tiny chunks (<15 tokens).
+- Add a final pass that drops/merges chunks below a hard minimum (e.g., 15 tokens).
+
+CRITICAL 4: TOC Chunks (17 chunks)
+
+File: pipeline.py (_merge_toc_segments)
+
+Problem: _merge_toc_segments combines TOC entries but still emits them as chunks. TOC pages are semantic black holes that match every query.
+
+Fix hints:
+- Best fix: drop TOC segments entirely.
+  segments = [s for s in segments if s.section != "TABLE OF CONTENTS"]
+- Alternative: keep a single TOC chunk but mark metadata is_toc=true so retriever can filter.
+- Improve _is_toc_segment for Italian variants (Sommario, Indice).
+
+HIGH 5: Missing Section Metadata (34.1%)
+
+File: metadata.py (update_structure_state)
+
+Problem: section is only set when SECTION_RE matches. Many docs use different section patterns.
+
+Fix hints:
+- Propagate section forward until a new section appears.
+- Widen SECTION_RE for PART/CHAPTER/CAPO/TITOLO and numeric headings.
+- Use heading_path as fallback when section is None.
+
+HIGH 6: N/A Pollution (75.5% of chunks)
+
+File: augment.py
+
+Problem: _meta_value() returns "N/A" for missing values.
+
+Fix hint: omit empty fields entirely.
+
+HIGH 7: Mixed-Article Chunks (44 non-TOC)
+
+File: chunking.py (build_segments)
+
+Problem: when an article heading appears mid-block, accumulated text can span multiple articles.
+
+Fix hints:
+- Force flush on article changes.
+- Post-process mixed chunks and split at article boundary lines.
+
+HIGH 8: Metadata-Dominated Chunks (23)
+
+Mostly caused by tiny chunks. After fixing small chunks, this should largely disappear.
+
+MEDIUM 9: Duplicates (13 instances, 4 unique texts)
+
+Fix: add dedup pass in _process_document_folder before emitting chunks.
+
+MEDIUM 10: Internal Sentence Repetition (16)
+
+Likely source OCR/merge artifacts. Add optional sentence dedup normalization pass.
+
+MEDIUM 11: 0-Based Page Indexing
+
+File: pipeline.py (_page_meta)
+
+Fix: output 1-based pages for user-facing references.
+
+MEDIUM 12: Article Metadata Mismatch (3)
+
+Low priority; likely fixed by stronger article boundary splitting.
+
+Recommended Fix Priority
+
+1. Fix #6 (N/A pollution) — quickest improvement.
+2. Fix #4 (TOC removal) — one-liner with high retrieval benefit.
+3. Fix #1 (Tokenizer) — use tiktoken or tighten budgets.
+4. Fix #3 (Small chunks) — increase merge threshold + hard minimum.
+5. Fix #2 (Overlap) — reduce to 30-40 and align to sentence boundaries.
+6. Fix #9 (Dedup) — add text-hash dedup pass.
+7. Fix #5 (Missing section) — broaden regex + fallback.
+8. Fix #7 (Mixed articles) — improve boundary splitting.
+
+Completed: Provide fix hints for each issue (2/2)
