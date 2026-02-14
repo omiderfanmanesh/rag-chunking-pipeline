@@ -21,8 +21,8 @@ HEADING_RE = re.compile(r"^\s*(#{1,6})\s+(.*)$")
 
 BLOCK_ALLOWED_TYPES = {"title", "text", "list", "table_body", "equation", "table_caption", "table_footnote"}
 CONTENT_ALLOWED_TYPES = {"text", "list", "table", "equation"}
-SMALL_SEGMENT_TOKEN_THRESHOLD = 30
-FINAL_TINY_CHUNK_TOKEN_THRESHOLD = 20
+SMALL_SEGMENT_TOKEN_THRESHOLD = 40
+FINAL_TINY_CHUNK_TOKEN_THRESHOLD = 30
 TOC_KEYWORD_RE = re.compile(r"(?i)\b(summary|sommario|indice|table of contents)\b")
 TOC_ENTRY_RE = re.compile(r"(?i)^(?:#\s*)?(?:art\.?|article|articolo)\s*\d+(?:\.\d+)?\b.*\b\d{1,3}\s*$")
 TOC_NUMBERED_ENTRY_RE = re.compile(r"(?i)^\s*(?:\d+(?:\.\d+){0,4})(?:\.?\s+|[.:])\S.*\s+\d{1,3}\s*$")
@@ -1022,7 +1022,7 @@ def _process_document_folder(folder: Path, config: PipelineConfig) -> tuple[dict
                     "page_start": page_start,
                     "page_end": page_end,
                     "page_refs": page_refs,
-                    "metadata": {
+                    "metadata": {k: v for k, v in {
                         "year": year,
                         "name": name,
                         "brief_description": brief_description,
@@ -1031,7 +1031,7 @@ def _process_document_folder(folder: Path, config: PipelineConfig) -> tuple[dict
                         "subarticle": chunk_subarticle,
                         "heading_path": segment.heading_path,
                         "language_hint": language_hint,
-                    },
+                    }.items() if v is not None},
                 }
             )
             if config.dedupe_chunks:
