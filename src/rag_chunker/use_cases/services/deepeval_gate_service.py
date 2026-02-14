@@ -12,11 +12,10 @@ from ...config.deepeval_gate_config import DeepEvalGateConfig
 
 
 class ThresholdMetric(BaseMetric):
-    def __init__(self, name: str, actual: float, max_allowed: float) -> None:
+    def __init__(self, name: str, actual: float, threshold: float) -> None:
         self._metric_name = name
         self.actual = float(actual)
-        self.max_allowed = float(max_allowed)
-        self.threshold = 1.0
+        self.threshold = float(threshold)
         self.score: float | None = None
         self.success: bool | None = None
         self.reason: str | None = None
@@ -26,9 +25,16 @@ class ThresholdMetric(BaseMetric):
         self.verbose_mode = False
 
     def measure(self, test_case: LLMTestCase, *args, **kwargs) -> float:  # noqa: ARG002
-        self.success = self.actual <= self.max_allowed
+        min_checks = {"median_tokens", "coverage_ratio"}
+        if self._metric_name in min_checks:
+            # For min thresholds, success if actual >= threshold
+            self.success = self.actual >= self.threshold
+            self.reason = f"actual={self.actual} min_required={self.threshold}"
+        else:
+            # For max thresholds, success if actual <= threshold
+            self.success = self.actual <= self.threshold
+            self.reason = f"actual={self.actual} max_allowed={self.threshold}"
         self.score = 1.0 if self.success else 0.0
-        self.reason = f"actual={self.actual} max_allowed={self.max_allowed}"
         return self.score
 
     async def a_measure(self, test_case: LLMTestCase, *args, **kwargs) -> float:  # noqa: ARG002
@@ -74,43 +80,43 @@ class DeepEvalGateService:
             {
                 "name": "tiny_chunk_pct",
                 "actual": tiny_chunk_pct,
-                "expected_max": config.max_tiny_chunk_pct,
+                "expected": config.max_tiny_chunk_pct,
                 "passed": tiny_chunk_pct <= config.max_tiny_chunk_pct,
             },
             {
                 "name": "duplicate_instance_pct",
                 "actual": duplicate_instance_pct,
-                "expected_max": config.max_duplicate_instance_pct,
+                "expected": config.max_duplicate_instance_pct,
                 "passed": duplicate_instance_pct <= config.max_duplicate_instance_pct,
             },
             {
                 "name": "overlap_p95_chars",
                 "actual": overlap_p95_chars,
-                "expected_max": float(config.max_overlap_p95_chars),
+                "expected": float(config.max_overlap_p95_chars),
                 "passed": overlap_p95_chars <= config.max_overlap_p95_chars,
             },
             {
                 "name": "missing_required_metadata_pct",
                 "actual": missing_metadata_pct,
-                "expected_max": config.max_missing_metadata_pct,
+                "expected": config.max_missing_metadata_pct,
                 "passed": missing_metadata_pct <= config.max_missing_metadata_pct,
             },
             {
                 "name": "mixed_article_pct",
                 "actual": mixed_article_pct,
-                "expected_max": config.max_mixed_article_pct,
+                "expected": config.max_mixed_article_pct,
                 "passed": mixed_article_pct <= config.max_mixed_article_pct,
             },
             {
                 "name": "median_tokens",
                 "actual": median_tokens,
-                "expected_min": config.min_median_tokens,
+                "expected": config.min_median_tokens,
                 "passed": median_tokens >= config.min_median_tokens,
             },
             {
                 "name": "coverage_ratio",
                 "actual": coverage_ratio,
-                "expected_min": config.min_coverage_ratio,
+                "expected": config.min_coverage_ratio,
                 "passed": coverage_ratio >= config.min_coverage_ratio,
             },
         ]
@@ -138,7 +144,7 @@ class DeepEvalGateService:
             actual_output=json.dumps({"checks": checks}),
             expected_output="all checks must pass",
         )
-        metrics = [ThresholdMetric(check["name"], check["actual"], check["expected_max"]) for check in checks]
+        metrics = [ThresholdMetric(check["name"], check["actual"], check["expected"]) for check in checks]
         assert_test(test_case, metrics, run_async=False)
         return report
 

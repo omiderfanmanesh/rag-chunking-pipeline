@@ -35,8 +35,16 @@ def _base_chunk(chunk_id, chunk_index, text, token_count=30, metadata=None):
 
 def _write_eval_report(path, duplicate_instance_pct=0.0):
     payload = {
-        "summary": {"overall_status": "excellent"},
-        "chunk_metrics": {"duplicates": {"duplicate_instance_pct": duplicate_instance_pct}},
+        "summary": {"overall_status": "excellent", "coverage_ratio": 95.0},
+        "chunk_metrics": {
+            "duplicates": {"duplicate_instance_pct": duplicate_instance_pct},
+            "token_stats": {"median": 150.0}
+        },
+        "metadata_metrics": {
+            "consistency": {
+                "article_mixed_chunks": {"pct": 0.0}
+            }
+        }
     }
     path.write_text(json.dumps(payload), encoding="utf-8")
 

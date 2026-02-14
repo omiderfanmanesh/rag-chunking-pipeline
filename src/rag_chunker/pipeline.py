@@ -20,6 +20,8 @@ from .use_cases.services.global_chunk_dedupe_service import GlobalChunkDedupeSer
 from .use_cases.services.tiny_chunk_sweep_service import TinyChunkSweepService
 from .use_cases.services.block_loader_service import load_canonical_blocks
 from .use_cases.services.segment_merge_service import _merge_toc_segments, _merge_small_segments, _dedup_chunk_boundaries
+from .use_cases.services.chunk_assembly_service import _chunk_segment_texts, _merge_tiny_chunk_texts, _split_table_rows, _is_table_chunk_text
+from .use_cases.services.structure_resolver_service import _resolve_structure, _resolve_chunk_article
 
 UUID_SUFFIX_RE = re.compile(r"-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE)
 TOC_KEYWORD_RE = re.compile(r"(?i)\b(summary|sommario|indice|table of contents)\b")
@@ -357,41 +359,8 @@ def _article_from_section_label(section: str | None) -> tuple[str | None, str | 
     return root, sub
 
 
-def _is_table_chunk_text(text: str) -> bool:
-    return text.lstrip().startswith("Table:")
 
 
-def _normalize_table_chunk_text(text: str) -> str:
-    cleaned = text.strip()
-    if not cleaned:
-        return ""
-
-    lines = [line.strip() for line in cleaned.splitlines() if line.strip()]
-    if not lines:
-        return ""
-
-    if lines[0].startswith("Table:"):
-        lines[0] = "Table:"
-        return "\n".join(lines).strip()
-
-    pipe_lines = [line for line in lines if "|" in line]
-    pipe_count = cleaned.count("|")
-    looks_table_like = len(pipe_lines) >= 2 or pipe_count >= 6
-    if not looks_table_like:
-        return cleaned
-
-    first_pipe_idx = next((idx for idx, line in enumerate(lines) if "|" in line), 0)
-    prefix_lines = lines[:first_pipe_idx]
-    table_lines = lines[first_pipe_idx:] if first_pipe_idx < len(lines) else lines
-    out_lines = ["Table:"]
-    if prefix_lines:
-        # Keep pre-table context as a caption row so no information is lost.
-        out_lines.append(" | ".join(prefix_lines))
-    out_lines.extend(table_lines)
-    return "\n".join(out_lines).strip()
-
-
-def _merge_tiny_chunk_texts(chunk_texts: list[str], *, min_tokens: int, max_tokens: int) -> list[str]:
     if not chunk_texts:
         return []
     working = [chunk.strip() for chunk in chunk_texts if chunk and chunk.strip()]
@@ -452,12 +421,12 @@ def _dedup_chunk_boundaries(chunk_texts: list[str], *, overlap_tokens: int) -> l
     return out
 
 
-def _final_tiny_chunk_sweep(chunk_rows: list[dict[str, Any]], *, max_tokens: int, sweep_tokens: int) -> list[dict[str, Any]]:
+def _final_tiny_chunk_sweep(chunk_rows: list[dict[str, Any]], *, max_tokens: int, sweep_tokens: int, min_viable_chunk_tokens: int) -> list[dict[str, Any]]:
     service = TinyChunkSweepService(
         max_tokens=max_tokens,
         sweep_tokens=sweep_tokens,
         count_tokens=count_tokens,
-        looks_structural_stub=lambda text, token_count: _looks_structural_stub(text, token_count=token_count, threshold=config.min_viable_chunk_tokens),
+        looks_structural_stub=lambda text, token_count: _looks_structural_stub(text, token_count=token_count, threshold=min_viable_chunk_tokens),
         compatible_chunk_structure=lambda row, section, article, subarticle: _compatible_chunk_structure(
             row,
             section=section,
@@ -568,75 +537,7 @@ def _merge_toc_segments(segments: list[Segment], *, max_tokens: int, drop_toc: b
     return merged
 
 
-def _split_table_rows(text: str, *, max_tokens: int) -> list[str]:
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
-    if not lines:
-        return []
-    if not lines[0].startswith("Table:"):
-        return [text.strip()]
 
-    data_lines = lines[1:]
-
-    def maybe_strip_orphan_prefix(chunk_text: str) -> str:
-        chunk_lines = [line.strip() for line in chunk_text.splitlines() if line.strip()]
-        if not chunk_lines:
-            return ""
-        if not chunk_lines[0].startswith("Table:"):
-            return chunk_text.strip()
-        body = chunk_lines[1:]
-        if any("|" in line for line in body):
-            return chunk_text.strip()
-        # Keep single-column tables, but drop "Table:" for prose-like tails.
-        prose_like = any(len(line.split()) > 12 or line.endswith((".", ";")) for line in body)
-        if prose_like:
-            return "\n".join(body).strip()
-        return chunk_text.strip()
-
-    if not any("|" in line for line in data_lines):
-        stripped = maybe_strip_orphan_prefix(text)
-        return [stripped] if stripped else []
-
-    header = lines[0]
-    rows = data_lines
-    chunks: list[str] = []
-    current_rows: list[str] = []
-
-    def flush_rows() -> None:
-        if current_rows:
-            chunk_text = maybe_strip_orphan_prefix(header + "\n" + "\n".join(current_rows))
-            if chunk_text:
-                chunks.append(chunk_text)
-
-    for row in rows:
-        row_candidate = header + "\n" + row
-        if count_tokens(row_candidate) > max_tokens:
-            flush_rows()
-            current_rows.clear()
-            split_rows = split_text_by_tokens(
-                row,
-                target_tokens=max_tokens,
-                max_tokens=max_tokens,
-                overlap_tokens=1,
-            )
-            for split_row in split_rows:
-                split_row = split_row.strip()
-                if not split_row:
-                    continue
-                chunk_text = maybe_strip_orphan_prefix(header + "\n" + split_row)
-                if chunk_text:
-                    chunks.append(chunk_text)
-            continue
-
-        expanded = header + "\n" + "\n".join(current_rows + [row])
-        if current_rows and count_tokens(expanded) > max_tokens:
-            flush_rows()
-            current_rows.clear()
-        current_rows.append(row)
-    flush_rows()
-    return [chunk for chunk in chunks if chunk.strip()] or [text.strip()]
-
-
-def _chunk_segment_texts(text: str, *, target_tokens: int, max_tokens: int, overlap_tokens: int, min_chars: int) -> list[str]:
     normalized = text.strip()
     if not normalized:
         return []
@@ -817,7 +718,7 @@ def _process_document_folder(folder: Path, config: PipelineConfig) -> tuple[dict
                 chunk_article = "front_matter"
             token_count = count_tokens(chunk_text)
             if token_count < config.min_chunk_tokens:
-                if _looks_structural_stub(chunk_text, token_count=token_count):
+                if _looks_structural_stub(chunk_text, token_count=token_count, threshold=config.min_viable_chunk_tokens):
                     continue
                 if chunk_rows and _compatible_chunk_structure(
                     chunk_rows[-1],
@@ -897,6 +798,7 @@ def _process_document_folder(folder: Path, config: PipelineConfig) -> tuple[dict
         chunk_rows,
         max_tokens=config.max_tokens,
         sweep_tokens=config.min_viable_chunk_tokens,
+        min_viable_chunk_tokens=config.min_viable_chunk_tokens,
     )
 
     pages = sorted(

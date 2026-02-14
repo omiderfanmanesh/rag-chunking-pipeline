@@ -19,6 +19,7 @@ def test_evaluator_generates_reports(tmp_path):
             "year": "2025-2026",
             "brief_description": "Desc",
             "language_hint": "en",
+            "source_md_path": str(artifacts / "source.md"),
         }
     ]
     chunks = [
@@ -66,6 +67,9 @@ def test_evaluator_generates_reports(tmp_path):
         },
     ]
     manifest = {"documents": 1, "chunks": 2, "source_modes": {"block_list": 1}, "errors": []}
+
+    # Create dummy source file
+    (artifacts / "source.md").write_text("ART. 1 Intro text\nArticle 1 body " + ("x " * 600), encoding="utf-8")
 
     _write_jsonl(artifacts / "documents.jsonl", docs)
     _write_jsonl(artifacts / "chunks.jsonl", chunks)

@@ -20,7 +20,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--target-tokens", type=int, default=420)
     parser.add_argument("--max-tokens", type=int, default=480)
     parser.add_argument("--overlap-tokens", type=int, default=30)
+    parser.add_argument("--max-overlap-chars", type=int, default=200)
     parser.add_argument("--min-chars", type=int, default=220)
+    parser.add_argument("--min-chunk-tokens", type=int, default=24)
+    parser.add_argument("--min-viable-chunk-tokens", type=int, default=50)
+    parser.add_argument("--drop-toc", action="store_true", default=True)
     parser.add_argument("--no-incremental", action="store_true", help="Always reprocess all documents")
     parser.add_argument("--fail-fast", action="store_true", help="Stop immediately if a document fails processing")
     return parser
@@ -36,7 +40,11 @@ def main() -> None:
         target_tokens=args.target_tokens,
         max_tokens=args.max_tokens,
         overlap_tokens=args.overlap_tokens,
+        max_overlap_chars=args.max_overlap_chars,
         min_chars=args.min_chars,
+        min_chunk_tokens=args.min_chunk_tokens,
+        min_viable_chunk_tokens=args.min_viable_chunk_tokens,
+        drop_toc=args.drop_toc,
         incremental=not args.no_incremental,
         fail_fast=args.fail_fast,
     )

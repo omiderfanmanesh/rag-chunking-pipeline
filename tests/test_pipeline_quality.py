@@ -40,7 +40,7 @@ def test_merge_toc_segments_consolidates_index_blocks():
             heading_path=["ART. 1 Intro"],
         ),
     ]
-    merged = _merge_toc_segments(segments, max_tokens=520)
+    merged = _merge_toc_segments(segments, max_tokens=520, drop_toc=False)
     assert len(merged) == 2
     assert merged[0].section == "TABLE OF CONTENTS"
     assert "Article 4 - Appeals" in merged[0].text
@@ -208,7 +208,7 @@ def test_final_tiny_chunk_sweep_merges_small_row_into_previous_when_compatible()
             "augmented_text": "",
         },
     ]
-    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20)
+    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20, min_viable_chunk_tokens=50)
     assert len(swept) == 1
     assert "tiny tail" in swept[0]["text"]
     assert swept[0]["page_start"] == 1
@@ -260,7 +260,7 @@ def test_final_tiny_chunk_sweep_drops_structural_stub():
             "augmented_text": "",
         },
     ]
-    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20)
+    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20, min_viable_chunk_tokens=50)
     assert len(swept) == 1
     assert "substantive article body" in swept[0]["text"]
 
@@ -310,7 +310,7 @@ def test_final_tiny_chunk_sweep_does_not_merge_tiny_table_into_prose():
             "augmented_text": "",
         },
     ]
-    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20)
+    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20, min_viable_chunk_tokens=50)
     assert len(swept) == 2
     assert swept[0]["text"].startswith("Narrative chunk")
     assert swept[1]["text"].startswith("Table:")
@@ -347,12 +347,12 @@ def test_is_toc_segment_detects_compact_numbered_entries_without_space_after_dot
 
 def test_looks_structural_stub_detects_index_entry_lines():
     text = "3.1 General requirements 9"
-    assert _looks_structural_stub(text, token_count=10)
+    assert _looks_structural_stub(text, token_count=10, threshold=50)
 
 
 def test_looks_structural_stub_detects_title_like_short_labels():
     text = "Accommodation Service Degree Awards UPDATE"
-    assert _looks_structural_stub(text, token_count=9)
+    assert _looks_structural_stub(text, token_count=9, threshold=50)
 
 
 def test_article_from_section_label_extracts_root_and_subarticle():
