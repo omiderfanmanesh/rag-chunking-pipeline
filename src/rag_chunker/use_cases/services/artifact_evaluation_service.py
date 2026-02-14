@@ -32,6 +32,24 @@ class ArtifactEvaluationService:
         total_docs = len(documents)
         doc_by_id = {doc.get("doc_id"): doc for doc in documents}
 
+        # Information-loss detection
+        coverage_ratios = []
+        for doc in documents:
+            doc_id = doc.get("doc_id")
+            source_path = Path(doc.get("source_md_path"))
+            if not source_path.exists():
+                continue
+            source_text = source_path.read_text(encoding="utf-8")
+            source_chars = set(re.sub(r'\s', '', source_text))
+            chunk_texts = [chunk.get("text", "") for chunk in chunks if chunk.get("doc_id") == doc_id]
+            chunk_combined = " ".join(chunk_texts)
+            chunk_chars = set(re.sub(r'\s', '', chunk_combined))
+            if source_chars:
+                intersection = source_chars & chunk_chars
+                ratio = len(intersection) / len(source_chars)
+                coverage_ratios.append(ratio)
+        overall_coverage = statistics.mean(coverage_ratios) if coverage_ratios else 0.0
+
         tokens = [int(chunk.get("token_count", 0)) for chunk in chunks]
         chars = [int(chunk.get("char_count", 0)) for chunk in chunks]
         small_chunks = [chunk for chunk in chunks if int(chunk.get("token_count", 0)) < config.small_chunk_threshold]
@@ -150,12 +168,14 @@ class ArtifactEvaluationService:
                 "source_modes": dict(source_modes),
                 "overall_score": overall_score,
                 "overall_status": self._dimension_status(overall_score),
+                "coverage_ratio": round(overall_coverage * 100, 2),
             },
             "dimensions": {
                 "size": {"score": round(size_score, 2), "status": self._dimension_status(size_score)},
                 "cleanliness": {"score": round(cleanliness_score, 2), "status": self._dimension_status(cleanliness_score)},
                 "metadata": {"score": round(metadata_score, 2), "status": self._dimension_status(metadata_score)},
                 "provenance": {"score": round(provenance_score, 2), "status": self._dimension_status(provenance_score)},
+                "coverage": {"score": round(overall_coverage * 100, 2), "status": self._dimension_status(overall_coverage * 100)},
             },
             "chunk_metrics": {
                 "token_stats": {

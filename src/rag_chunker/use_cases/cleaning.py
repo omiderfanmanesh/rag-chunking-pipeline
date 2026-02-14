@@ -102,6 +102,18 @@ def normalize_inline_math(text: str) -> str:
     text = text.replace("\\left", "").replace("\\right", "")
     text = text.replace("\\times", "×")
     text = text.replace("\\cdot", "·")
+    # Add LaTeX command mappings
+    latex_mappings = {
+        "\\succ": ">",
+        "\\prec": "<",
+        "\\geq": "≥",
+        "\\leq": "≤",
+        "\\bullet": "•",
+        "\\neq": "≠",
+        "\\approx": "≈",
+    }
+    for cmd, sym in latex_mappings.items():
+        text = text.replace(cmd, sym)
 
     def replacer(match: re.Match[str]) -> str:
         inner = match.group(1)
@@ -115,7 +127,8 @@ def normalize_inline_math(text: str) -> str:
     text = text.replace("\\%", "%")
     text = text.replace(r"\(", "(").replace(r"\)", ")")
     text = text.replace(r"\[", "[").replace(r"\]", "]")
-    text = re.sub(r"\\([A-Za-z]+)", r"\1", text)
+    # Catch-all for unknown LaTeX commands
+    text = re.sub(r"\\[a-z]+\b", "", text)
     return text
 
 

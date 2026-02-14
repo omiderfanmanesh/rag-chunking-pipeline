@@ -28,17 +28,23 @@ class ChunkingService:
     @staticmethod
     def _load_tokenizer():
         try:  # pragma: no cover
-            import tiktoken
+            from tokenizers import Tokenizer
 
-            return tiktoken.get_encoding("cl100k_base")
+            return Tokenizer.from_pretrained("Cohere/Cohere-embed-multilingual-v3.0")
         except Exception:  # pragma: no cover
-            return None
+            try:  # pragma: no cover
+                import tiktoken
+
+                return tiktoken.get_encoding("cl100k_base")
+            except Exception:  # pragma: no cover
+                return None
 
     def count_tokens(self, text: str) -> int:
         if not text:
             return 0
         if self._tokenizer is not None:
-            return len(self._tokenizer.encode(text, disallowed_special=()))
+            encoding = self._tokenizer.encode(text)
+            return len(encoding.ids)
         return int(len(TOKEN_RE.findall(text)) * self._fallback_token_safety_factor + 0.5)
 
     def _fallback_budget(self, value: int) -> int:
@@ -319,7 +325,7 @@ class ChunkingService:
             safe_overlap = min(max(1, self._fallback_budget(overlap_tokens)), safe_target - 1)
             return self._split_text_by_regex_tokens(text, safe_target, safe_max, safe_overlap)
 
-        token_ids = self._tokenizer.encode(text, disallowed_special=())
+        token_ids = self._tokenizer.encode(text).ids
         token_count = len(token_ids)
         if token_count == 0:
             return []

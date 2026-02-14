@@ -17,8 +17,8 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["block_first"],
         help="Source selection policy",
     )
-    parser.add_argument("--target-tokens", type=int, default=450)
-    parser.add_argument("--max-tokens", type=int, default=520)
+    parser.add_argument("--target-tokens", type=int, default=420)
+    parser.add_argument("--max-tokens", type=int, default=480)
     parser.add_argument("--overlap-tokens", type=int, default=30)
     parser.add_argument("--min-chars", type=int, default=220)
     parser.add_argument("--no-incremental", action="store_true", help="Always reprocess all documents")

@@ -59,11 +59,13 @@ def extract_year(text: str) -> str | None:
 
 def extract_document_name(blocks: list[CanonicalBlock], fallback_name: str) -> str:
     title_candidates: list[str] = []
-    for block in blocks[:60]:
+    for block in blocks:
+        if not block.page_refs or block.page_refs[0].page_idx > 1:  # Prefer pages 1-2 only (0-based)
+            continue
         if block.block_type != "title":
             continue
         text = block.text.strip().lstrip("#").strip()
-        if len(text) >= 4:
+        if len(text) >= 4 and "art." not in text.lower():  # Negative filter for article references
             title_candidates.append(text)
 
     def score_title(value: str) -> int:
@@ -79,6 +81,9 @@ def extract_document_name(blocks: list[CanonicalBlock], fallback_name: str) -> s
     if title_candidates:
         best = max(title_candidates, key=score_title)
         if score_title(best) >= 20:
+            # If contains newlines, take first line
+            if "\n" in best:
+                best = best.split("\n")[0].strip()
             return best
 
     for block in blocks:

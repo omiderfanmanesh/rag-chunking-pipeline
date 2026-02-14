@@ -1,17 +1,18 @@
 {
   "summary": {
     "documents": 8,
-    "chunks": 1788,
+    "chunks": 1610,
     "source_modes": {
       "block_list": 7,
       "content_list": 1
     },
-    "overall_score": 99.94,
-    "overall_status": "excellent"
+    "overall_score": 99.93,
+    "overall_status": "excellent",
+    "coverage_ratio": 93.91
   },
   "dimensions": {
     "size": {
-      "score": 99.8,
+      "score": 99.78,
       "status": "excellent"
     },
     "cleanliness": {
@@ -25,32 +26,36 @@
     "provenance": {
       "score": 100.0,
       "status": "excellent"
+    },
+    "coverage": {
+      "score": 93.91,
+      "status": "excellent"
     }
   },
   "chunk_metrics": {
     "token_stats": {
-      "min": 14,
-      "median": 124.0,
-      "p95": 454.0,
-      "max": 520,
-      "avg": 169.86
+      "min": 17,
+      "median": 144.0,
+      "p95": 429.0,
+      "max": 478,
+      "avg": 183.27
     },
     "char_stats": {
       "min": 45,
-      "median": 520.0,
-      "p95": 2079.0,
-      "max": 2612,
-      "avg": 726.94
+      "median": 597.5,
+      "p95": 1890.0,
+      "max": 2340,
+      "avg": 782.15
     },
     "small_chunks": {
       "threshold": 20,
       "count": 6,
-      "pct": 0.34
+      "pct": 0.37
     },
     "moderate_chunks": {
       "threshold": 50,
-      "count": 266,
-      "pct": 14.88
+      "count": 55,
+      "pct": 3.42
     },
     "oversized_chunks": {
       "max_tokens": 520,
@@ -58,8 +63,8 @@
       "pct": 0.0
     },
     "in_target_range": {
-      "count": 1782,
-      "pct": 99.66
+      "count": 1604,
+      "pct": 99.63
     },
     "duplicates": {
       "duplicate_instances": 0,
@@ -90,8 +95,8 @@
         "pct": 0.0
       },
       "subarticle_missing": {
-        "count": 1065,
-        "pct": 59.56
+        "count": 954,
+        "pct": 59.25
       },
       "language_missing": {
         "count": 0,
@@ -118,8 +123,8 @@
     },
     "consistency": {
       "article_mixed_chunks": {
-        "count": 4,
-        "pct": 0.22
+        "count": 5,
+        "pct": 0.31
       },
       "article_metadata_mismatch": {
         "count": 0,
@@ -171,142 +176,116 @@
     "oversized_chunks": [],
     "small_chunks": [
       {
-        "chunk_id": "9048049ad785f572c899",
+        "chunk_id": "75645e9fb0230e20ecb5",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 17,
+        "chunk_index": 8,
         "token_count": 17,
         "page_start": 6,
         "page_end": 7,
         "text_preview": "3. EXCLUSIVE COURT 35  GENERAL NOTES 36  DEADLINES"
       },
       {
-        "chunk_id": "8af2be4fa30ebb6371b9",
+        "chunk_id": "6ba1ba4e57eb7e435555",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 24,
-        "token_count": 17,
-        "page_start": 9,
-        "page_end": 9,
-        "text_preview": "# SCHOLARSHIP  (vedi Deadline and procedure for submitting the application)"
-      },
-      {
-        "chunk_id": "b11f057308ed96d19237",
-        "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 103,
+        "chunk_index": 95,
         "token_count": 19,
         "page_start": 24,
         "page_end": 24,
         "text_preview": "8. Final ranking  The final ranking will be published after the review procedure has been completed."
       },
       {
-        "chunk_id": "c381d714a9a95363e66d",
+        "chunk_id": "0f2fefc2eb38de6ac909",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 113,
-        "token_count": 14,
+        "chunk_index": 105,
+        "token_count": 19,
         "page_start": 26,
         "page_end": 26,
         "text_preview": "1. Confirmations at preferential tariff until completion of the requests;"
       },
       {
-        "chunk_id": "73451a95df8eb5680c45",
+        "chunk_id": "12bd41134d31937d8b44",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 133,
-        "token_count": 18,
-        "page_start": 30,
-        "page_end": 30,
-        "text_preview": "# 2. REQUIREMENTS  Students must meet the income and merit requirements specified below:"
-      },
-      {
-        "chunk_id": "48f78f52ed83207d8b86",
-        "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 137,
-        "token_count": 18,
+        "chunk_index": 130,
+        "token_count": 19,
         "page_start": 31,
         "page_end": 31,
         "text_preview": "# 4. PRICE OF THE MEAL  These are the tariffs for the meal:"
+      },
+      {
+        "chunk_id": "1156da4ff722205f0c90",
+        "doc_id": "984ed7cb5e1ecd8a",
+        "chunk_index": 1,
+        "token_count": 19,
+        "page_start": 2,
+        "page_end": 2,
+        "text_preview": "3. CONDIZIONI GENERALI DI PARTECIPAZIONE AL CONCORSO...6"
+      },
+      {
+        "chunk_id": "474e0debbcd26efa4b2b",
+        "doc_id": "984ed7cb5e1ecd8a",
+        "chunk_index": 2,
+        "token_count": 17,
+        "page_start": 2,
+        "page_end": 3,
+        "text_preview": "14. ACCERTAMENTO CONDIZIONI ECONOMICHE 37  # PAVIA"
       }
     ],
     "article_mixed_chunks": [
       {
-        "chunk_id": "39bfbb91d70ce92f3da6",
+        "chunk_id": "cb823a2b42ee810c08ea",
         "doc_id": "557c2c9e16696227",
-        "chunk_index": 138,
-        "token_count": 289,
+        "chunk_index": 124,
+        "token_count": 332,
         "page_start": 50,
         "page_end": 51,
         "text_preview": "# Art.40 Criteria for the definition of rankings  In the event that applications exceed the availability of funds, the benefit will be allocated on the basis of the rankings drawn up according to the following priority c"
       },
       {
-        "chunk_id": "5d1598949fe435cf566f",
+        "chunk_id": "26d9e1464b58ae45ca09",
         "doc_id": "557c2c9e16696227",
-        "chunk_index": 155,
-        "token_count": 177,
+        "chunk_index": 138,
+        "token_count": 198,
         "page_start": 55,
         "page_end": 55,
         "text_preview": "# Art.44 Scholarship allocation deadlines  Subject to any administrative barriers and the availability of funds, the scholarships will be paid to beneficiary students as follows:  - The first instalment of the grant, i.e"
       },
       {
-        "chunk_id": "57a73dfdfa74b6c5093f",
+        "chunk_id": "4c7c738bd72700cf5edb",
         "doc_id": "c84f05ba69b70685",
-        "chunk_index": 155,
-        "token_count": 434,
-        "page_start": 47,
-        "page_end": 47,
-        "text_preview": "Art. 13(2) 20% INCREASE OF GRANT AMOUNT FOR SECOND-COURSE ENROLMENT  Art. 6 of Ministerial Decree 1320/2022 provides that students enrolled at the same time in more than one course are allowed to obtain and keep the scho"
+        "chunk_index": 23,
+        "token_count": 348,
+        "page_start": 11,
+        "page_end": 11,
+        "text_preview": "UPDATE  Art. 9 sets out specific provisions for students attending the \"filter semester\" of medicina e chirurgia, medicina veterinaria e Odontoiatria e protesi dentaria courses.  Art. 1(2) UNIVERSITIES  Students enrolled"
       },
       {
-        "chunk_id": "9379b2d07b5e5184df77",
+        "chunk_id": "bd29725786a3e9c5bb04",
         "doc_id": "c84f05ba69b70685",
-        "chunk_index": 209,
-        "token_count": 360,
+        "chunk_index": 193,
+        "token_count": 383,
         "page_start": 61,
         "page_end": 62,
         "text_preview": "Art. 17(7) 20 % INCREASE OF SCHOLARSHIP AMOUNT FOR SECOND-COURSE ENROLMENT  Art. 6 of Ministerial Decree 1320/2021 provides that students enrolled at the same time in more than one course are allowed to obtain and keep t"
+      },
+      {
+        "chunk_id": "2a62b5e3c4691f326fe6",
+        "doc_id": "c84f05ba69b70685",
+        "chunk_index": 199,
+        "token_count": 439,
+        "page_start": 63,
+        "page_end": 64,
+        "text_preview": "Art. 18(3) REFUND OF REGIONAL TAX  For students in subsequent years who were successful or eligible for a scholarship in the definitive ranking for the academic year. 2024/25 and who, at the time of enrolment, have paid "
       }
     ],
     "ocr_bookmark_leftovers": []
   },
   "manifest_echo": {
     "documents": 8,
-    "chunks": 1788,
+    "chunks": 1610,
     "errors": [],
     "source_modes": {
       "block_list": 7,
       "content_list": 1
     }
-  },
-  "quality_gates": {
-    "passed": true,
-    "checks": [
-      {
-        "name": "oversized_chunks",
-        "actual": 0,
-        "expected": "<= 0",
-        "passed": true
-      },
-      {
-        "name": "small_chunks_pct",
-        "actual": 0.34,
-        "expected": "<= 12.0",
-        "passed": true
-      },
-      {
-        "name": "mixed_article_chunks_pct",
-        "actual": 0.22,
-        "expected": "<= 5.0",
-        "passed": true
-      },
-      {
-        "name": "residual_noise_count",
-        "actual": 0,
-        "expected": "<= 0",
-        "passed": true
-      },
-      {
-        "name": "provenance_issues_count",
-        "actual": 0,
-        "expected": "<= 0",
-        "passed": true
-      }
-    ]
   }
 }

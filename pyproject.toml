@@ -7,7 +7,7 @@ name = "rag-chunker"
 version = "0.1.0"
 description = "MinerU-aware deterministic chunking pipeline for RAG."
 requires-python = ">=3.11"
-dependencies = ["tiktoken>=0.7.0"]
+dependencies = ["tiktoken>=0.7.0", "tokenizers>=0.15.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0", "deepeval>=3.8,<4"]

@@ -66,6 +66,10 @@ class DeepEvalGateService:
         overlaps = self._consecutive_overlaps(chunks, scan_chars=config.overlap_scan_chars)
         overlap_p95_chars = self._p95(overlaps)
 
+        median_tokens = float(eval_report["chunk_metrics"]["token_stats"]["median"])
+        mixed_article_pct = float(eval_report["metadata_metrics"]["consistency"]["article_mixed_chunks"]["pct"])
+        coverage_ratio = float(eval_report["summary"]["coverage_ratio"])
+
         checks = [
             {
                 "name": "tiny_chunk_pct",
@@ -90,6 +94,24 @@ class DeepEvalGateService:
                 "actual": missing_metadata_pct,
                 "expected_max": config.max_missing_metadata_pct,
                 "passed": missing_metadata_pct <= config.max_missing_metadata_pct,
+            },
+            {
+                "name": "mixed_article_pct",
+                "actual": mixed_article_pct,
+                "expected_max": config.max_mixed_article_pct,
+                "passed": mixed_article_pct <= config.max_mixed_article_pct,
+            },
+            {
+                "name": "median_tokens",
+                "actual": median_tokens,
+                "expected_min": config.min_median_tokens,
+                "passed": median_tokens >= config.min_median_tokens,
+            },
+            {
+                "name": "coverage_ratio",
+                "actual": coverage_ratio,
+                "expected_min": config.min_coverage_ratio,
+                "passed": coverage_ratio >= config.min_coverage_ratio,
             },
         ]
 

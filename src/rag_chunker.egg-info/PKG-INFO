@@ -4,5 +4,7 @@ Version: 0.1.0
 Summary: MinerU-aware deterministic chunking pipeline for RAG.
 Requires-Python: >=3.11
 Requires-Dist: tiktoken>=0.7.0
+Requires-Dist: tokenizers>=0.15.0
 Provides-Extra: dev
 Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: deepeval<4,>=3.8; extra == "dev"

@@ -1,0 +1,226 @@
+User: analyze the chunk pipeline and tell me what is the weakness and how to solve it and give me a plan. also compare the chunks with origin doc 
+
+GitHub Copilot: 
+
+  
+
+Analyze RAG chunking pipeline
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/pyproject.toml)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/eval_report.md)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/rag_analysis_report.txt)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/config)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/domain)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/infrastructure)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/interfaces)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/pipeline.py#1-1), lines 1 to 500
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/chunking.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/cleaning.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/augment.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/metadata.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/evaluator.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/pipeline.py#500-500), lines 500 to 1188
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/deepeval_gates.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/config/pipeline_config.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/config/eval_config.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/config/deepeval_gate_config.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services/chunking_service.py#1-1), lines 1 to 300
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services/artifact_evaluation_service.py#1-1), lines 1 to 400
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services/deepeval_gate_service.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services/global_chunk_dedupe_service.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services/tiny_chunk_sweep_service.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services/incremental_cache_service.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/domain/models.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/infrastructure/io.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/interfaces/cli.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/deepeval_gate_report.json)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/run_manifest.json)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/tests/test_chunking.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/tests/test_cleaning.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/tests/test_augment.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/tests/test_metadata.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/tests/test_e2e_pipeline.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/tests/test_evaluator.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/tests/test_deepeval_gates.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/tests/test_pipeline_quality.py#1-1), lines 1 to 200
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/chunks.jsonl#1-1), lines 1 to 30
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/documents.jsonl)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services/chunking_service.py#300-300), lines 300 to 364
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/__init__.py)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/src/rag_chunker/use_cases/services/artifact_evaluation_service.py#400-400), lines 400 to 495
+
+Read [](file:///Users/omiderfanmanesh/Library/Application%20Support/Code/User/workspaceStorage/bf751d86ccaf46577f345f200b5a1103/GitHub.copilot-chat/chat-session-resources/83b58544-f031-45bb-8fae-0a6e837ef747/toolu_011ir221CrJtHVQwHXt928YJ__vscode-1771063401007/content.txt)
+
+Now let me get deeper chunk-vs-source comparisons by examining actual artifacts side by side. 
+
+Compare chunks with source docs
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/chunks.jsonl#1-1), lines 1 to 100
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/documents.jsonl)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/eval_report.md)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/rag_analysis_report.txt)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/run_manifest.json)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/ARDiSFriuli%E2%80%91VeneziaGiulia-2025-2026.pdf-2b6c96b2-42d6-452c-af45-7b2ee57d32ea/ARDiSFriuli%E2%80%91VeneziaGiulia-2025-2026.md#1-1), lines 1 to 150
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts/deepeval_gate_report.json)
+
+Read [](file:///Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/ARDiSFriuli%E2%80%91VeneziaGiulia-2025-2026.pdf-2b6c96b2-42d6-452c-af45-7b2ee57d32ea/ARDiSFriuli%E2%80%91VeneziaGiulia-2025-2026.md#151-151), lines 151 to 300
+
+Read [](file:///Users/omiderfanmanesh/Library/Application%20Support/Code/User/workspaceStorage/bf751d86ccaf46577f345f200b5a1103/GitHub.copilot-chat/chat-session-resources/83b58544-f031-45bb-8fae-0a6e837ef747/toolu_012x9iKyQ4yZp8nuZYNn4SzF__vscode-1771063401054/content.txt)
+
+Excellent — I now have a thorough understanding of the pipeline, its weaknesses, and the chunk-vs-source fidelity. Let me clarify a few key decisions before presenting the plan. 
+
+Asked 3 questions (Priority, Scope, Embedding)
+
+## Plan: Fix RAG Chunking Pipeline Weaknesses
+
+The pipeline scores 99.94/100 on its own eval but a deeper analysis reveals **17 weaknesses** (4 critical, 4 high, 6 medium, 3 low) hiding behind lenient quality gates. Median chunk size is 124 tokens vs 450 target, the regex tokenizer undercounts by 15–25% vs real BPE, overlap is effectively zero despite being configured at 30 tokens, LaTeX commands leak as bare words (`succ`), and 75.5% of chunks carry `N/A` pollution in augmented text. The plan targets Cohere Multilingual embeddings (512 token max input for `embed-multilingual-v3.0`), meaning the tokenizer fix is **critical** — chunks reported as 520 tokens may actually be ~650 real tokens, exceeding the model limit.
+
+Two phases: **Phase 1** (functional fixes, 13 steps) and **Phase 2** (architectural refactoring, 4 steps).
+
+---
+
+**Phase 1 — Functional Fixes**
+
+**Step 1: Fix tokenizer mismatch (CRITICAL)**  
+Replace the regex tokenizer fallback in chunking_service.py with a proper Cohere-compatible tokenizer. Since Cohere uses a SentencePiece-based tokenizer, add `tokenizers` as a dependency in pyproject.toml and load the Cohere tokenizer. Set `max_tokens=480` and `target_tokens=420` to stay within the 512-token Cohere limit with room for the meta prefix. Update `_count_tokens()`, `_choose_end_index_bpe()`, and `_next_start_index_bpe()` to use the new tokenizer. Add a config field `tokenizer_name` to pipeline_config.py defaulting to `"Cohere/Cohere-embed-multilingual-v3.0"`.
+
+**Step 2: Fix overlap being effectively zero (CRITICAL)**  
+The `MAX_CONSECUTIVE_OVERLAP_CHARS = 30` constant at chunking_service.py caps overlap to 30 characters (~5 tokens), which combined with the start-index advancement logic produces zero effective overlap. Raise this to `MAX_CONSECUTIVE_OVERLAP_CHARS = 200` (configurable via `PipelineConfig.max_overlap_chars`). Also fix `_next_start_index_bpe` / `_next_start_index_regex` to actually respect the configured `overlap_tokens=30` by computing the overlap window correctly — advance from `(end - overlap_tokens)` rather than from end and capping by chars.
+
+**Step 3: Consolidate small/stub chunks (CRITICAL)**  
+The merge threshold gap (40 tokens in `_merge_small_segments` vs 30 in `_final_tiny_chunk_sweep` vs 24 `min_chunk_tokens`) lets chunks between 30–40 tokens survive all passes. Unify to a single configurable `min_viable_chunk_tokens = 50` in pipeline_config.py. In pipeline.py, update `_merge_small_segments()` and the tiny sweep in tiny_chunk_sweep_service.py to use this unified threshold. Additionally, in `_merge_small_segments()` at pipeline.py, extend the merge window to also absorb segments up to `min_viable_chunk_tokens` even when the structural context doesn't perfectly match (prefer merging forward into the next section rather than dropping).
+
+**Step 4: Fix excessive cross-chunk overlap (CRITICAL)**  
+The RAG analysis found 91 pairs with >200 char overlap (max 59.4%). This comes from `_strip_fragment_prefix` not stripping enough and from the segment-level duplication when a segment boundary falls within a merged block. In pipeline.py, after `_chunk_segment_texts()`, add a post-processing pass `_dedup_chunk_boundaries()` that detects when consecutive chunks share >20% text and trims the overlapping prefix from the later chunk (preserving only the configured overlap amount).
+
+**Step 5: Fix LaTeX residue (`succ` → bullet) (HIGH)**  
+In cleaning.py, the `normalize_inline_math()` function strips `$...$` delimiters and converts `\frac`, `\times`, etc., but doesn't handle `\succ` (which becomes bare `succ`). Add a LaTeX command→symbol mapping: `\succ` → `>`, `\prec` → `<`, `\geq` → `≥`, `\leq` → `≤`, `\bullet` → `•`, `\cdot` → `·`, `\neq` → `≠`, `\approx` → `≈`. Apply this mapping **before** stripping the backslash. Also add a regex catch-all `r'\\[a-z]+\b'` → `''` to remove any remaining unknown LaTeX commands rather than leaving them as bare words.
+
+**Step 6: Fix TOC handling inconsistency (HIGH)**  
+Currently 17 TOC chunks survive into the index. The `_is_toc_segment` heuristic in pipeline.py fails on TOC blocks that are typed as `text` rather than `list`. Strengthen the TOC detector: (a) check for high density of `Art\.\s*\d+` references (≥5 per segment), (b) check for "Table of Contents"/"Summary"/"Indice"/"Sommario" headings in `heading_path`, (c) when `drop_toc=True`, fully remove these segments instead of consolidating them into a marker chunk. Update `_merge_toc_segments()` at pipeline.py to delete rather than merge.
+
+**Step 7: Fix N/A pollution in augmented text (HIGH)**  
+75.5% of chunks have `N/A` in their augmented prefix for missing metadata fields. In augment.py, change `build_augmented_text()` to **omit** metadata fields that are `None`, empty, or `"N/A"` / `"front_matter"` rather than including them as `N/A`. This reduces noise in the embedding input and saves tokens (~10–20 tokens per chunk).
+
+**Step 8: Fix document name extraction (HIGH)**  
+In metadata.py, the `extract_document_name()` heuristic produces bad titles like TOC headings or bullet lists. Improve by: (a) prefer blocks from pages 1–2 only, (b) add negative filter for lines containing `Art.`/`art.` (article references), (c) if the best candidate contains newlines, take only the first line, (d) fall back to the normalized folder name from pipeline.py which is derived from the PDF filename and is generally decent.
+
+**Step 9: Fix mixed-article chunks (MEDIUM)**  
+44 chunks span multiple articles. In `_merge_small_segments()` at pipeline.py, the compatibility check at `_can_merge()` allows merging when both segments have `article=None`. Add a stricter check: never merge segments whose `heading_path` differs at level ≥ 2, and never merge across article boundaries even when both are `None` but heading text differs.
+
+**Step 10: Fix page_refs 0-based indexing (MEDIUM)**  
+Chunks use 0-based `page_idx` but documents report 1-based pages. In pipeline.py, when building the final chunk dict, convert `page_idx` to 1-based by adding 1 to each `page_start` and `page_end` value. Update the provenance evaluator in artifact_evaluation_service.py accordingly.
+
+**Step 11: Add information-loss detection (MEDIUM)**  
+Add a new evaluation step in artifact_evaluation_service.py: after chunking, collect all non-whitespace text from the source blocks and all non-whitespace text from the chunks (minus augmented prefixes). Compute a coverage ratio `len(source_chars ∩ chunk_chars) / len(source_chars)`. Gate: coverage must be ≥ 95%. Log any uncovered paragraphs. This catches dropped content like the Summary pages.
+
+**Step 12: Strengthen quality gates (MEDIUM)**  
+Update deepeval_gate_service.py thresholds to match the real analysis findings:
+- `tiny_chunk_pct` threshold: 1.0% → 0.5%
+- Add gate: `mixed_article_pct` ≤ 2.0%
+- Add gate: `coverage_ratio` ≥ 95%
+- Add gate: `median_tokens` ≥ 100
+- Fix: use the same tokenizer as the pipeline (Cohere) in the evaluator, not a separate regex counter.
+
+**Step 13: Add list-item awareness (LOW)**  
+In chunking_service.py, modify `_choose_end_index_bpe` / `_choose_end_index_regex` to recognize list-item boundaries (lines starting with `- `, `* `, `\d+\.`, or lettered lists `a)`, `b)`) and prefer splitting between items rather than mid-item. Similar to the existing sentence-boundary snapping but for list structures.
+
+---
+
+**Phase 2 — Architectural Refactoring**
+
+**Step 14: Split pipeline.py into cohesive modules**  
+Extract from pipeline.py (1,188 lines) into:
+- `use_cases/services/block_loader_service.py` — `_load_canonical_blocks`, `_load_blocks_from_block_list`, `_load_blocks_from_content_list`
+- `use_cases/services/segment_merge_service.py` — `_merge_toc_segments`, `_merge_small_segments`, `_dedup_chunk_boundaries`
+- `use_cases/services/chunk_assembly_service.py` — `_chunk_segment_texts`, `_merge_tiny_chunk_texts`, `_split_table_rows`
+- `use_cases/services/structure_resolver_service.py` — `_resolve_structure`, `_resolve_chunk_article`
+Keep `pipeline.py` as a thin orchestrator that wires these services together.
+
+**Step 15: Centralize magic constants**  
+Move all scattered thresholds (`SMALL_SEGMENT_TOKEN_THRESHOLD=40`, `FINAL_TINY_CHUNK_TOKEN_THRESHOLD=30`, `MAX_CONSECUTIVE_OVERLAP_CHARS=30`, `min_chars=220`, etc.) into pipeline_config.py as named, documented fields with sensible defaults.
+
+**Step 16: Unify source-loading strategies**  
+Extend `choose_source()` in io.py to support `"content_list_first"`, `"markdown_first"`, and `"block_first"` strategies. Add consistency tests that verify the same document produces equivalent chunks regardless of source path. Update the CLI in cli.py to expose all strategies.
+
+**Step 17: Add integration test for content coverage**  
+Create `tests/test_content_coverage.py` that loads a known document, runs the full pipeline, and asserts ≥95% text coverage between source blocks and output chunks. Also test that no chunk exceeds the Cohere 512-token limit using the actual Cohere tokenizer.
+
+---
+
+**Verification**
+
+1. Run `pytest tests/` — all existing tests must pass (update expected values where thresholds change)
+2. Re-run the pipeline on all 8 documents and verify:
+   - `median_tokens ≥ 100` (up from 124, should improve with better merging)
+   - `tiny_chunk_pct < 0.5%` (down from 0.34%)
+   - `mixed_article_pct < 2.0%` (down from ~2.5%)
+   - `coverage_ratio ≥ 95%`
+   - No chunk exceeds 512 Cohere tokens (verify with actual Cohere tokenizer)
+   - `overlap_p95_chars` between 50–150 (proving overlap actually works)
+   - Zero `succ` or bare LaTeX commands in chunk text
+   - Zero `N/A` in augmented text
+3. Manually inspect 10 random chunks from each document for semantic coherence
+4. Compare eval_report.md before/after — overall score should remain ≥ 95 with the stricter gates
+5. Run `grep -c "succ " artifacts/chunks.jsonl` — expect 0
+6. Run `grep -c "N/A" artifacts/chunks.jsonl` in augmented_text fields — expect 0
+
+**Decisions**
+- **Tokenizer**: Cohere multilingual (512 max) instead of tiktoken — drives `max_tokens=480` to leave headroom for meta prefix
+- **Overlap fix**: Raise char cap to 200 + fix start-index logic, rather than removing overlap entirely
+- **TOC strategy**: Full removal when `drop_toc=True`, not consolidation into a marker chunk
+- **N/A fields**: Omit from augmented text rather than replacing with a different placeholder
+- **Refactoring deferred**: Phase 2 runs after Phase 1 is validated, to avoid mixing functional fixes with structural changes

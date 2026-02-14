@@ -5,7 +5,9 @@ def _meta_value(value: str | None) -> str | None:
     if value is None:
         return None
     stripped = value.strip()
-    return stripped if stripped else None
+    if not stripped or stripped.lower() in ("n/a", "front_matter"):
+        return None
+    return stripped
 
 
 def build_augmented_text(

@@ -1,11 +1,11 @@
 {
   "summary": {
-    "chunks": 1788,
+    "chunks": 1610,
     "eval_report_overall_status": "excellent",
-    "gates_passed": true
+    "gates_passed": false
   },
   "metrics": {
-    "tiny_chunk_pct": 0.34,
+    "tiny_chunk_pct": 0.37,
     "duplicate_instance_pct": 0.0,
     "overlap_p95_chars": 0.0,
     "missing_required_metadata_pct": 0.0
@@ -13,8 +13,8 @@
   "checks": [
     {
       "name": "tiny_chunk_pct",
-      "actual": 0.34,
-      "expected_max": 1.0,
+      "actual": 0.37,
+      "expected_max": 0.5,
       "passed": true
     },
     {
@@ -34,6 +34,24 @@
       "actual": 0.0,
       "expected_max": 0.0,
       "passed": true
+    },
+    {
+      "name": "mixed_article_pct",
+      "actual": 0.31,
+      "expected_max": 2.0,
+      "passed": true
+    },
+    {
+      "name": "median_tokens",
+      "actual": 144.0,
+      "expected_min": 100,
+      "passed": true
+    },
+    {
+      "name": "coverage_ratio",
+      "actual": 93.91,
+      "expected_min": 95.0,
+      "passed": false
     }
   ]
 }
