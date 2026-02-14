@@ -14,43 +14,43 @@
     {
       "name": "tiny_chunk_pct",
       "actual": 0.37,
-      "expected_max": 0.5,
+      "expected": 1.0,
       "passed": true
     },
     {
       "name": "duplicate_instance_pct",
       "actual": 0.0,
-      "expected_max": 0.0,
+      "expected": 0.0,
       "passed": true
     },
     {
       "name": "overlap_p95_chars",
       "actual": 0.0,
-      "expected_max": 30.0,
+      "expected": 200.0,
       "passed": true
     },
     {
       "name": "missing_required_metadata_pct",
       "actual": 0.0,
-      "expected_max": 0.0,
+      "expected": 0.0,
       "passed": true
     },
     {
       "name": "mixed_article_pct",
       "actual": 0.31,
-      "expected_max": 2.0,
+      "expected": 2.0,
       "passed": true
     },
     {
       "name": "median_tokens",
       "actual": 144.0,
-      "expected_min": 100,
+      "expected": 100,
       "passed": true
     },
     {
       "name": "coverage_ratio",
       "actual": 93.91,
-      "expected_min": 95.0,
+      "expected": 95.0,
       "passed": false
     }
   ]

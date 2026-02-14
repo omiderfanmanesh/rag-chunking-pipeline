@@ -6,13 +6,13 @@
       "block_list": 7,
       "content_list": 1
     },
-    "overall_score": 99.93,
+    "overall_score": 99.38,
     "overall_status": "excellent",
     "coverage_ratio": 93.91
   },
   "dimensions": {
     "size": {
-      "score": 99.78,
+      "score": 97.95,
       "status": "excellent"
     },
     "cleanliness": {
@@ -48,9 +48,9 @@
       "avg": 782.15
     },
     "small_chunks": {
-      "threshold": 20,
-      "count": 6,
-      "pct": 0.37
+      "threshold": 50,
+      "count": 55,
+      "pct": 3.42
     },
     "moderate_chunks": {
       "threshold": 50,
@@ -58,13 +58,13 @@
       "pct": 3.42
     },
     "oversized_chunks": {
-      "max_tokens": 520,
+      "max_tokens": 480,
       "count": 0,
       "pct": 0.0
     },
     "in_target_range": {
-      "count": 1604,
-      "pct": 99.63
+      "count": 1555,
+      "pct": 96.58
     },
     "duplicates": {
       "duplicate_instances": 0,
@@ -176,6 +176,33 @@
     "oversized_chunks": [],
     "small_chunks": [
       {
+        "chunk_id": "0d3b8b268e8035f7821f",
+        "doc_id": "1e162e0a730f4193",
+        "chunk_index": 47,
+        "token_count": 39,
+        "page_start": 15,
+        "page_end": 15,
+        "text_preview": "Table: ann./cred. sistemi - minimo ann./cred. richiesti | x 600 | + | somma voti | -18 | x 400"
+      },
+      {
+        "chunk_id": "a26b4e07b6960d42dd90",
+        "doc_id": "557c2c9e16696227",
+        "chunk_index": 104,
+        "token_count": 39,
+        "page_start": 43,
+        "page_end": 43,
+        "text_preview": "# Specific governance of the subsidised accommodation  With regard to accommodation at subsidised rates, DiSCo will, through a subsequent supplementary regulation, identify the specific governance."
+      },
+      {
+        "chunk_id": "827921557c9745553c92",
+        "doc_id": "b49ec96ec1b6adc3",
+        "chunk_index": 5,
+        "token_count": 38,
+        "page_start": 3,
+        "page_end": 4,
+        "text_preview": "The ISEE is not required to submit the application, but it is necessary to obtain a correct ISEE by the deadline (read the ISEE Guide published on the University website)."
+      },
+      {
         "chunk_id": "75645e9fb0230e20ecb5",
         "doc_id": "b49ec96ec1b6adc3",
         "chunk_index": 8,
@@ -185,49 +212,40 @@
         "text_preview": "3. EXCLUSIVE COURT 35  GENERAL NOTES 36  DEADLINES"
       },
       {
-        "chunk_id": "6ba1ba4e57eb7e435555",
+        "chunk_id": "b5f7878a0db3cb200cd8",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 95,
-        "token_count": 19,
-        "page_start": 24,
-        "page_end": 24,
-        "text_preview": "8. Final ranking  The final ranking will be published after the review procedure has been completed."
+        "chunk_index": 15,
+        "token_count": 20,
+        "page_start": 9,
+        "page_end": 9,
+        "text_preview": "# SCHOLARSHIP  (vedi Deadline and procedure for submitting the application)"
       },
       {
-        "chunk_id": "0f2fefc2eb38de6ac909",
+        "chunk_id": "bc9e7ad6659e35b18910",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 105,
-        "token_count": 19,
-        "page_start": 26,
-        "page_end": 26,
-        "text_preview": "1. Confirmations at preferential tariff until completion of the requests;"
+        "chunk_index": 46,
+        "token_count": 39,
+        "page_start": 14,
+        "page_end": 14,
+        "text_preview": "# 4. ECONOMIC REQUIREMENTS  To meet the economic requirement necessary for the scholarship application, students must have a correct ISEE with a value not higher than:"
       },
       {
-        "chunk_id": "12bd41134d31937d8b44",
+        "chunk_id": "2dfd41493531867034dc",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 130,
-        "token_count": 19,
-        "page_start": 31,
-        "page_end": 31,
-        "text_preview": "# 4. PRICE OF THE MEAL  These are the tariffs for the meal:"
+        "chunk_index": 47,
+        "token_count": 25,
+        "page_start": 14,
+        "page_end": 14,
+        "text_preview": "Table: ISEE | € 26.516,70 ISPE* | € 57.645,03"
       },
       {
-        "chunk_id": "1156da4ff722205f0c90",
-        "doc_id": "984ed7cb5e1ecd8a",
-        "chunk_index": 1,
-        "token_count": 19,
-        "page_start": 2,
-        "page_end": 2,
-        "text_preview": "3. CONDIZIONI GENERALI DI PARTECIPAZIONE AL CONCORSO...6"
-      },
-      {
-        "chunk_id": "474e0debbcd26efa4b2b",
-        "doc_id": "984ed7cb5e1ecd8a",
-        "chunk_index": 2,
-        "token_count": 17,
-        "page_start": 2,
-        "page_end": 3,
-        "text_preview": "14. ACCERTAMENTO CONDIZIONI ECONOMICHE 37  # PAVIA"
+        "chunk_id": "8da3740bec4004eda63e",
+        "doc_id": "b49ec96ec1b6adc3",
+        "chunk_index": 62,
+        "token_count": 26,
+        "page_start": 17,
+        "page_end": 18,
+        "text_preview": "Before January 1 2026 the cost of the meal will depend on the income bracket based on the ISEE value."
       }
     ],
     "article_mixed_chunks": [
@@ -287,5 +305,40 @@
       "block_list": 7,
       "content_list": 1
     }
+  },
+  "quality_gates": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "oversized_chunks",
+        "actual": 0,
+        "expected": "<= 0",
+        "passed": true
+      },
+      {
+        "name": "small_chunks_pct",
+        "actual": 3.42,
+        "expected": "<= 12.0",
+        "passed": true
+      },
+      {
+        "name": "mixed_article_chunks_pct",
+        "actual": 0.31,
+        "expected": "<= 5.0",
+        "passed": true
+      },
+      {
+        "name": "residual_noise_count",
+        "actual": 0,
+        "expected": "<= 0",
+        "passed": true
+      },
+      {
+        "name": "provenance_issues_count",
+        "actual": 0,
+        "expected": "<= 0",
+        "passed": true
+      }
+    ]
   }
 }
