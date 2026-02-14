@@ -1,17 +1,17 @@
 {
   "summary": {
     "documents": 8,
-    "chunks": 1867,
+    "chunks": 1789,
     "source_modes": {
       "block_list": 7,
       "content_list": 1
     },
-    "overall_score": 99.74,
+    "overall_score": 99.95,
     "overall_status": "excellent"
   },
   "dimensions": {
     "size": {
-      "score": 99.42,
+      "score": 99.83,
       "status": "excellent"
     },
     "cleanliness": {
@@ -19,7 +19,7 @@
       "status": "excellent"
     },
     "metadata": {
-      "score": 99.7,
+      "score": 100.0,
       "status": "excellent"
     },
     "provenance": {
@@ -29,28 +29,28 @@
   },
   "chunk_metrics": {
     "token_stats": {
-      "min": 6,
-      "median": 117.0,
-      "p95": 451.0,
+      "min": 14,
+      "median": 124.0,
+      "p95": 453.0,
       "max": 520,
-      "avg": 162.39
+      "avg": 170.25
     },
     "char_stats": {
-      "min": 26,
-      "median": 491.0,
-      "p95": 2045.0,
+      "min": 45,
+      "median": 527.0,
+      "p95": 2066.0,
       "max": 2612,
-      "avg": 695.91
+      "avg": 729.01
     },
     "small_chunks": {
       "threshold": 20,
-      "count": 18,
-      "pct": 0.96
+      "count": 5,
+      "pct": 0.28
     },
     "moderate_chunks": {
       "threshold": 50,
-      "count": 373,
-      "pct": 19.98
+      "count": 265,
+      "pct": 14.81
     },
     "oversized_chunks": {
       "max_tokens": 520,
@@ -58,8 +58,8 @@
       "pct": 0.0
     },
     "in_target_range": {
-      "count": 1849,
-      "pct": 99.04
+      "count": 1784,
+      "pct": 99.72
     },
     "duplicates": {
       "duplicate_instances": 0,
@@ -86,12 +86,12 @@
         "pct": 0.0
       },
       "article_missing": {
-        "count": 28,
-        "pct": 1.5
+        "count": 0,
+        "pct": 0.0
       },
       "subarticle_missing": {
-        "count": 1057,
-        "pct": 56.61
+        "count": 1065,
+        "pct": 59.53
       },
       "language_missing": {
         "count": 0,
@@ -119,7 +119,7 @@
     "consistency": {
       "article_mixed_chunks": {
         "count": 4,
-        "pct": 0.21
+        "pct": 0.22
       },
       "article_metadata_mismatch": {
         "count": 0,
@@ -171,72 +171,45 @@
     "oversized_chunks": [],
     "small_chunks": [
       {
-        "chunk_id": "2f8391420e063439ac9d",
+        "chunk_id": "8af2be4fa30ebb6371b9",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 16,
-        "token_count": 17,
-        "page_start": 5,
-        "page_end": 5,
-        "text_preview": "11.1. Total forfeiture 22  11.2.Partial forfeiture 22"
-      },
-      {
-        "chunk_id": "1c4d753dff8cd8002d15",
-        "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 21,
-        "token_count": 16,
-        "page_start": 6,
-        "page_end": 6,
-        "text_preview": "7.2. Forfeiture 29  CANTEEN SERVICE 30"
-      },
-      {
-        "chunk_id": "8ea3f988c3ffaead1fe4",
-        "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 22,
-        "token_count": 19,
-        "page_start": 6,
-        "page_end": 6,
-        "text_preview": "7. FORFEITURE 31  DEFINITIONS 32  EXAMPLES 33"
-      },
-      {
-        "chunk_id": "532f6c83b8b301782387",
-        "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 34,
+        "chunk_index": 24,
         "token_count": 17,
         "page_start": 9,
         "page_end": 9,
         "text_preview": "# SCHOLARSHIP  (vedi Deadline and procedure for submitting the application)"
       },
       {
-        "chunk_id": "b7dd32608f2c000e1224",
+        "chunk_id": "b11f057308ed96d19237",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 118,
+        "chunk_index": 103,
         "token_count": 19,
         "page_start": 24,
         "page_end": 24,
         "text_preview": "8. Final ranking  The final ranking will be published after the review procedure has been completed."
       },
       {
-        "chunk_id": "08befa1c601c3116ebe3",
+        "chunk_id": "c381d714a9a95363e66d",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 128,
+        "chunk_index": 113,
         "token_count": 14,
         "page_start": 26,
         "page_end": 26,
         "text_preview": "1. Confirmations at preferential tariff until completion of the requests;"
       },
       {
-        "chunk_id": "3bc1c3fd2383bb1891ea",
+        "chunk_id": "73451a95df8eb5680c45",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 148,
+        "chunk_index": 133,
         "token_count": 18,
         "page_start": 30,
         "page_end": 30,
         "text_preview": "# 2. REQUIREMENTS  Students must meet the income and merit requirements specified below:"
       },
       {
-        "chunk_id": "87a542c730ce1850465e",
+        "chunk_id": "48f78f52ed83207d8b86",
         "doc_id": "b49ec96ec1b6adc3",
-        "chunk_index": 152,
+        "chunk_index": 137,
         "token_count": 18,
         "page_start": 31,
         "page_end": 31,
@@ -245,18 +218,18 @@
     ],
     "article_mixed_chunks": [
       {
-        "chunk_id": "21886b6ab43159d33da5",
+        "chunk_id": "39bfbb91d70ce92f3da6",
         "doc_id": "557c2c9e16696227",
-        "chunk_index": 128,
+        "chunk_index": 138,
         "token_count": 289,
         "page_start": 50,
         "page_end": 51,
         "text_preview": "# Art.40 Criteria for the definition of rankings  In the event that applications exceed the availability of funds, the benefit will be allocated on the basis of the rankings drawn up according to the following priority c"
       },
       {
-        "chunk_id": "6602fd84f5568fa0668b",
+        "chunk_id": "5d1598949fe435cf566f",
         "doc_id": "557c2c9e16696227",
-        "chunk_index": 146,
+        "chunk_index": 155,
         "token_count": 177,
         "page_start": 55,
         "page_end": 55,
@@ -272,9 +245,9 @@
         "text_preview": "Art. 13(2) 20% INCREASE OF GRANT AMOUNT FOR SECOND-COURSE ENROLMENT  Art. 6 of Ministerial Decree 1320/2022 provides that students enrolled at the same time in more than one course are allowed to obtain and keep the scho"
       },
       {
-        "chunk_id": "017446a60afa5f69a46a",
+        "chunk_id": "7c125045248989f0e9d9",
         "doc_id": "c84f05ba69b70685",
-        "chunk_index": 215,
+        "chunk_index": 210,
         "token_count": 360,
         "page_start": 61,
         "page_end": 62,
@@ -285,7 +258,7 @@
   },
   "manifest_echo": {
     "documents": 8,
-    "chunks": 1867,
+    "chunks": 1789,
     "errors": [],
     "source_modes": {
       "block_list": 7,
@@ -303,13 +276,13 @@
       },
       {
         "name": "small_chunks_pct",
-        "actual": 0.96,
+        "actual": 0.28,
         "expected": "<= 12.0",
         "passed": true
       },
       {
         "name": "mixed_article_chunks_pct",
-        "actual": 0.21,
+        "actual": 0.22,
         "expected": "<= 5.0",
         "passed": true
       },

@@ -1,9 +1,9 @@
 {
   "input_dir": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data",
   "output_dir": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/artifacts",
-  "processed_at_utc": "2026-02-10T18:37:58.191816+00:00",
+  "processed_at_utc": "2026-02-14T09:43:41.382922+00:00",
   "documents": 8,
-  "chunks": 1867,
+  "chunks": 1789,
   "source_modes": {
     "block_list": 7,
     "content_list": 1

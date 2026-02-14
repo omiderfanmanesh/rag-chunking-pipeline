@@ -53,3 +53,13 @@ def test_clean_text_dedupes_consecutive_duplicate_sentences():
     cleaned = clean_text(raw)
     assert cleaned.count("Students must submit the online application before the deadline.") == 1
     assert "Late submissions are not accepted." in cleaned
+
+
+def test_clean_text_dedupes_non_consecutive_long_lines():
+    raw = (
+        "The issue of documentation is free of charge and available through the designated office.\n"
+        "Different informational line.\n"
+        "The issue of documentation is free of charge and available through the designated office.\n"
+    )
+    cleaned = clean_text(raw)
+    assert cleaned.count("The issue of documentation is free of charge and available through the designated office.") == 1

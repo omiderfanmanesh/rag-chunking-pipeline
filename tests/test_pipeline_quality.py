@@ -162,12 +162,54 @@ def test_is_toc_segment_detects_numbered_outline_entries():
     assert _is_toc_segment(segment)
 
 
+def test_is_toc_segment_detects_compact_numbered_entries_without_space_after_dot():
+    segment = Segment(
+        text="11.1.Total forfeiture 22\n11.2.Partial forfeiture 22\n11.3.Consequences 23",
+        page_refs=[PageRef(0)],
+        section=None,
+        article=None,
+        subarticle=None,
+        heading_path=[],
+    )
+    assert _is_toc_segment(segment)
+
+
 def test_looks_structural_stub_detects_index_entry_lines():
     text = "3.1 General requirements 9"
     assert _looks_structural_stub(text, token_count=10)
+
+
+def test_looks_structural_stub_detects_title_like_short_labels():
+    text = "Accommodation Service Degree Awards UPDATE"
+    assert _looks_structural_stub(text, token_count=9)
 
 
 def test_article_from_section_label_extracts_root_and_subarticle():
     article, subarticle = _article_from_section_label("3.2.1 Access requirement")
     assert article == "3"
     assert subarticle == "3.2.1"
+
+
+def test_merge_small_segments_compatible_with_same_article_different_subarticle():
+    s1 = Segment(
+        text="11.1 Total forfeiture",
+        page_refs=[PageRef(1)],
+        section="SECTION IV",
+        article="11",
+        subarticle="11.1",
+        heading_path=["SECTION IV", "11.1"],
+    )
+    s2 = Segment(
+        text="11.2 Partial forfeiture details",
+        page_refs=[PageRef(1)],
+        section="SECTION IV",
+        article="11",
+        subarticle="11.2",
+        heading_path=["SECTION IV", "11.2"],
+    )
+    from rag_chunker.pipeline import _merge_small_segments
+
+    merged = _merge_small_segments([s1, s2], min_tokens=30, max_tokens=120)
+    assert len(merged) == 1
+    assert "11.1 Total forfeiture" in merged[0].text
+    assert "11.2 Partial forfeiture details" in merged[0].text

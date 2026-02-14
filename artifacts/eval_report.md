@@ -2,16 +2,16 @@
 
 ## Summary
 - Documents: 8
-- Chunks: 1867
-- Overall score: 99.74 (excellent)
+- Chunks: 1789
+- Overall score: 99.95 (excellent)
 - Source modes: {'block_list': 7, 'content_list': 1}
 
 ## Dimension Scores
 | Dimension | Score | Status |
 |---|---:|---|
-| size | 99.42 | excellent |
+| size | 99.83 | excellent |
 | cleanliness | 100.0 | excellent |
-| metadata | 99.7 | excellent |
+| metadata | 100.0 | excellent |
 | provenance | 100.0 | excellent |
 
 ## Quality Gates
@@ -19,22 +19,22 @@
 | Gate | Actual | Expected | Passed |
 |---|---:|---:|---|
 | oversized_chunks | 0 | <= 0 | True |
-| small_chunks_pct | 0.96 | <= 12.0 | True |
-| mixed_article_chunks_pct | 0.21 | <= 5.0 | True |
+| small_chunks_pct | 0.28 | <= 12.0 | True |
+| mixed_article_chunks_pct | 0.22 | <= 5.0 | True |
 | residual_noise_count | 0 | <= 0 | True |
 | provenance_issues_count | 0 | <= 0 | True |
 
 ## Chunk Quality
-- Token stats: min=6, median=117.0, p95=451.0, max=520, avg=162.39
-- Small chunks (<20): 18 (0.96%)
+- Token stats: min=14, median=124.0, p95=453.0, max=520, avg=170.25
+- Small chunks (<20): 5 (0.28%)
 - Oversized chunks (>520): 0 (0.0%)
-- In target range: 1849 (99.04%)
+- In target range: 1784 (99.72%)
 - Duplicate instances: 0 (0.0%)
 
 ## Metadata Quality
-- Chunk missing section/article/subarticle: 0.0% / 1.5% / 56.61%
+- Chunk missing section/article/subarticle: 0.0% / 0.0% / 59.53%
 - Chunk-doc year/name mismatch: 0 / 0
-- Mixed-article chunks: 4 (0.21%)
+- Mixed-article chunks: 4 (0.22%)
 
 ## Cleanliness and Provenance
 - Residual HTML/math/latex/OCR: 0 / 0 / 0 / 0

@@ -20,10 +20,10 @@ HEADING_RE = re.compile(r"^\s*(#{1,6})\s+(.*)$")
 
 BLOCK_ALLOWED_TYPES = {"title", "text", "list", "table_body", "equation", "table_caption", "table_footnote"}
 CONTENT_ALLOWED_TYPES = {"text", "list", "table", "equation"}
-SMALL_SEGMENT_TOKEN_THRESHOLD = 20
+SMALL_SEGMENT_TOKEN_THRESHOLD = 30
 TOC_KEYWORD_RE = re.compile(r"(?i)\b(summary|sommario|indice|table of contents)\b")
 TOC_ENTRY_RE = re.compile(r"(?i)^(?:#\s*)?(?:art\.?|article|articolo)\s*\d+(?:\.\d+)?\b.*\b\d{1,3}\s*$")
-TOC_NUMBERED_ENTRY_RE = re.compile(r"(?i)^\s*(?:\d+(?:\.\d+){0,4})\.?\s+.+\s+\d{1,3}\s*$")
+TOC_NUMBERED_ENTRY_RE = re.compile(r"(?i)^\s*(?:\d+(?:\.\d+){0,4})(?:\.?\s+|[.:])\S.*\s+\d{1,3}\s*$")
 PAGE_TAIL_RE = re.compile(r"\b\d{1,3}\s*$")
 STRUCTURAL_STUB_RE = re.compile(r"(?i)^\s*(?:#\s*)?(?:art\.?|article|articolo|section|sezione)\b")
 SECTION_HEADING_RE = re.compile(r"(?i)\b(?:section|sezione)\s+[IVXLC0-9]+\b")
@@ -41,7 +41,7 @@ class PipelineConfig:
     max_tokens: int = 520
     overlap_tokens: int = 30
     min_chars: int = 220
-    min_chunk_tokens: int = 20
+    min_chunk_tokens: int = 24
     drop_toc: bool = True
     dedupe_chunks: bool = True
     fail_fast: bool = False
@@ -292,6 +292,16 @@ def _same_structure(a, b) -> bool:
     return a.section == b.section and a.article == b.article and a.subarticle == b.subarticle
 
 
+def _compatible_for_small_merge(a, b) -> bool:
+    if _same_structure(a, b):
+        return True
+    if a.article and b.article and a.article == b.article:
+        return True
+    if a.section and b.section and a.section == b.section and not a.article and not b.article:
+        return True
+    return False
+
+
 def _merge_two_segments(a, b):
     heading_path = a.heading_path if a.heading_path else b.heading_path
     return type(a)(
@@ -329,7 +339,7 @@ def _merge_small_segments(segments, *, min_tokens: int, max_tokens: int):
 
         while seg_tokens < min_tokens and idx + 1 < len(working):
             nxt = working[idx + 1]
-            if not _same_structure(segment, nxt):
+            if not _compatible_for_small_merge(segment, nxt):
                 break
             merged_candidate = _merge_two_segments(segment, nxt)
             if count_tokens(merged_candidate.text) > max_tokens:
@@ -342,14 +352,14 @@ def _merge_small_segments(segments, *, min_tokens: int, max_tokens: int):
             nxt = working[idx + 1]
             line_count = len([line for line in segment.text.splitlines() if line.strip()])
             looks_like_label = line_count <= 2 and len(segment.text) <= 120
-            if looks_like_label and _same_structure(segment, nxt):
+            if looks_like_label and _compatible_for_small_merge(segment, nxt):
                 merged_candidate = _prepend_segment_to_next(segment, nxt)
                 if count_tokens(merged_candidate.text) <= max_tokens:
                     segment = merged_candidate
                     idx += 1
                     seg_tokens = count_tokens(segment.text)
 
-        if out and seg_tokens < min_tokens and _same_structure(out[-1], segment):
+        if out and seg_tokens < min_tokens and _compatible_for_small_merge(out[-1], segment):
             merged_candidate = _merge_two_segments(out[-1], segment)
             if count_tokens(merged_candidate.text) <= max_tokens:
                 out[-1] = merged_candidate
@@ -370,6 +380,13 @@ def _looks_structural_stub(text: str, *, token_count: int) -> bool:
     if all((TOC_ENTRY_RE.match(line) or TOC_NUMBERED_ENTRY_RE.match(line)) for line in lines):
         if any(PAGE_TAIL_RE.search(line) for line in lines):
             return True
+    if all(PAGE_TAIL_RE.search(line) for line in lines):
+        if any(
+            TOC_NUMBERED_ENTRY_RE.match(line)
+            or re.match(r"^\s*(?:#\s*)?(?:art\.?|article|articolo|section|sezione)\b", line, re.IGNORECASE)
+            for line in lines
+        ):
+            return True
     if any("|" in line for line in lines):
         return False
     if all(line.startswith("#") for line in lines):
@@ -377,8 +394,12 @@ def _looks_structural_stub(text: str, *, token_count: int) -> bool:
     joined = " ".join(lines)
     if STRUCTURAL_STUB_RE.match(joined):
         return True
-    if token_count <= 8 and joined.upper() == joined and any(ch.isalpha() for ch in joined):
+    if token_count <= 12 and joined.upper() == joined and any(ch.isalpha() for ch in joined):
         return True
+    if token_count <= 12:
+        words = re.findall(r"[A-Za-zÀ-ÿ']+", joined)
+        if 2 <= len(words) <= 10 and all(word[0].isupper() for word in words if word and word[0].isalpha()):
+            return True
     return False
 
 
@@ -389,6 +410,31 @@ def _same_chunk_structure(chunk_row: dict[str, Any], *, section: str | None, art
         and metadata.get("article") == article
         and metadata.get("subarticle") == subarticle
     )
+
+
+def _compatible_chunk_structure(
+    chunk_row: dict[str, Any],
+    *,
+    section: str | None,
+    article: str | None,
+    subarticle: str | None,
+) -> bool:
+    if _same_chunk_structure(chunk_row, section=section, article=article, subarticle=subarticle):
+        return True
+    metadata = chunk_row.get("metadata", {})
+    existing_article = metadata.get("article")
+    existing_section = metadata.get("section")
+    if existing_article and article and existing_article == article:
+        return True
+    if (
+        not existing_article
+        and not article
+        and existing_section
+        and section
+        and existing_section == section
+    ):
+        return True
+    return False
 
 
 def _merge_page_ref_payload(existing: list[dict[str, Any]], incoming: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -855,11 +901,13 @@ def _process_document_folder(folder: Path, config: PipelineConfig) -> tuple[dict
                     chunk_article = section_article
                     if chunk_subarticle is None:
                         chunk_subarticle = section_subarticle
+            if chunk_article is None:
+                chunk_article = "front_matter"
             token_count = count_tokens(chunk_text)
             if token_count < config.min_chunk_tokens:
                 if _looks_structural_stub(chunk_text, token_count=token_count):
                     continue
-                if chunk_rows and _same_chunk_structure(
+                if chunk_rows and _compatible_chunk_structure(
                     chunk_rows[-1],
                     section=resolved_section,
                     article=chunk_article,

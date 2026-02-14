@@ -25,6 +25,10 @@ def build_augmented_text(
     subarticle_value = _meta_value(subarticle)
     _ = brief_description
 
+    # Discard noisy overlong section labels (often OCR spillover from body text).
+    if section_value and len(section_value) > 96:
+        section_value = None
+
     if year_value:
         prefix.append(f"year={year_value}")
     if section_value:
@@ -37,8 +41,12 @@ def build_augmented_text(
     body = chunk_text.strip()
     meta_words = len(meta_line.split())
     body_words = len(body.split())
+    meta_chars = len(meta_line)
+    body_chars = len(body)
     if body_words == 0:
         return meta_line
     if meta_words / (meta_words + body_words) > 0.7:
+        return body
+    if body_chars > 0 and meta_chars / (meta_chars + body_chars) > 0.7:
         return body
     return meta_line + "\n\n" + body

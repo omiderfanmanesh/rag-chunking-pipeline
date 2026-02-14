@@ -1,0 +1,67 @@
+name: Quality Gates
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        env:
+          PYTHONPATH: src
+        run: pytest -q
+
+      - name: Build artifacts
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m rag_chunker.cli \
+            --input-dir data \
+            --output-dir artifacts-ci \
+            --source-priority block_first \
+            --target-tokens 450 \
+            --max-tokens 520 \
+            --overlap-tokens 30
+
+      - name: Evaluate artifacts
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m rag_chunker.eval_cli \
+            --artifacts-dir artifacts-ci \
+            --output-json artifacts-ci/eval_report.json \
+            --output-md artifacts-ci/eval_report.md \
+            --target-tokens 450 \
+            --max-tokens 520 \
+            --fail-on-threshold
+
+      - name: Run DeepEval gates
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m rag_chunker.deepeval_cli \
+            --artifacts-dir artifacts-ci \
+            --eval-report artifacts-ci/eval_report.json \
+            --output-json artifacts-ci/deepeval_gate_report.json \
+            --max-overlap-p95-chars 50 \
+            --max-duplicate-instance-pct 0 \
+            --max-missing-metadata-pct 0 \
+            --fail-on-threshold

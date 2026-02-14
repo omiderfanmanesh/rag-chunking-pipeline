@@ -134,17 +134,18 @@ def _dedupe_consecutive_sentences(text: str) -> str:
     if len(parts) <= 1:
         return text
     deduped: list[str] = []
-    prev_norm: str | None = None
+    seen_norms: set[str] = set()
     for part in parts:
         candidate = part.strip()
         if not candidate:
             continue
         norm = re.sub(r"\s+", " ", candidate).strip().lower()
-        # Only remove clearly duplicated full sentences, not short labels.
-        if prev_norm == norm and len(norm) >= 24:
+        # Remove repeated full sentences, but keep short labels/captions.
+        if norm in seen_norms and len(norm) >= 24:
             continue
         deduped.append(candidate)
-        prev_norm = norm
+        if len(norm) >= 24:
+            seen_norms.add(norm)
     return " ".join(deduped) if deduped else text
 
 
@@ -162,6 +163,7 @@ def clean_text(text: str) -> str:
     text = re.sub(r"([0-9]{1,2}(?:st|nd|rd|th))(20[0-9]{2})", r"\1 \2", text)
 
     cleaned_lines: list[str] = []
+    seen_long_non_table_lines: set[str] = set()
     for raw_line in text.splitlines():
         line = re.sub(r"\s+", " ", raw_line).strip()
         if not line:
@@ -172,6 +174,11 @@ def clean_text(text: str) -> str:
             continue
         if cleaned_lines and cleaned_lines[-1] == line:
             continue
+        if "|" not in line and not line.startswith("#") and len(line) >= 48:
+            normalized_line = re.sub(r"\s+", " ", line).strip().lower()
+            if normalized_line in seen_long_non_table_lines:
+                continue
+            seen_long_non_table_lines.add(normalized_line)
         cleaned_lines.append(line)
 
     cleaned = "\n".join(cleaned_lines)
