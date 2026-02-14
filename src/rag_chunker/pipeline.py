@@ -3,17 +3,18 @@ from __future__ import annotations
 import hashlib
 import re
 import sys
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .augment import build_augmented_text
-from .chunking import build_segments, count_tokens, split_text_by_tokens
-from .cleaning import IMAGE_LINE_RE, clean_text
-from .io import choose_source, discover_document_folders, read_json, read_text, write_json, write_jsonl
-from .metadata import detect_language_hint, extract_brief_description, extract_document_name, extract_year
-from .models import CanonicalBlock, PageRef, Segment, SourceChoice
+from .use_cases.augment import build_augmented_text
+from .use_cases.chunking import build_segments, count_tokens, split_text_by_tokens
+from .use_cases.cleaning import IMAGE_LINE_RE, clean_text
+from .config import PipelineConfig
+from .infrastructure.io import choose_source, discover_document_folders, read_json, read_text, write_json, write_jsonl
+from .use_cases.metadata import detect_language_hint, extract_brief_description, extract_document_name, extract_year
+from .domain.models import CanonicalBlock, PageRef, Segment, SourceChoice
+from .use_cases.services import GlobalChunkDedupeService, IncrementalCacheService, TinyChunkSweepService
 
 UUID_SUFFIX_RE = re.compile(r"-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE)
 HEADING_RE = re.compile(r"^\s*(#{1,6})\s+(.*)$")
@@ -21,6 +22,7 @@ HEADING_RE = re.compile(r"^\s*(#{1,6})\s+(.*)$")
 BLOCK_ALLOWED_TYPES = {"title", "text", "list", "table_body", "equation", "table_caption", "table_footnote"}
 CONTENT_ALLOWED_TYPES = {"text", "list", "table", "equation"}
 SMALL_SEGMENT_TOKEN_THRESHOLD = 30
+FINAL_TINY_CHUNK_TOKEN_THRESHOLD = 20
 TOC_KEYWORD_RE = re.compile(r"(?i)\b(summary|sommario|indice|table of contents)\b")
 TOC_ENTRY_RE = re.compile(r"(?i)^(?:#\s*)?(?:art\.?|article|articolo)\s*\d+(?:\.\d+)?\b.*\b\d{1,3}\s*$")
 TOC_NUMBERED_ENTRY_RE = re.compile(r"(?i)^\s*(?:\d+(?:\.\d+){0,4})(?:\.?\s+|[.:])\S.*\s+\d{1,3}\s*$")
@@ -30,21 +32,6 @@ SECTION_HEADING_RE = re.compile(r"(?i)\b(?:section|sezione)\s+[IVXLC0-9]+\b")
 ARTICLE_HEADING_RE = re.compile(r"(?i)\b(?:art\.?|article|articolo)\s*[-.:]?\s*(\d+(?:\.\d+)*)\b")
 ARTICLE_LINE_RE = re.compile(r"(?i)^\s*(?:#\s*)?(?:art\.?|article|articolo)\s*[-.:]?\s*(\d+(?:\.\d+)*)\b")
 LEADING_NUMERIC_SECTION_RE = re.compile(r"^\s*(\d+(?:\.\d+)*)\b")
-
-
-@dataclass
-class PipelineConfig:
-    input_dir: Path
-    output_dir: Path
-    source_priority: str = "block_first"
-    target_tokens: int = 450
-    max_tokens: int = 520
-    overlap_tokens: int = 30
-    min_chars: int = 220
-    min_chunk_tokens: int = 24
-    drop_toc: bool = True
-    dedupe_chunks: bool = True
-    fail_fast: bool = False
 
 
 def _sha1(value: str) -> str:
@@ -545,6 +532,36 @@ def _is_table_chunk_text(text: str) -> bool:
     return text.lstrip().startswith("Table:")
 
 
+def _normalize_table_chunk_text(text: str) -> str:
+    cleaned = text.strip()
+    if not cleaned:
+        return ""
+
+    lines = [line.strip() for line in cleaned.splitlines() if line.strip()]
+    if not lines:
+        return ""
+
+    if lines[0].startswith("Table:"):
+        lines[0] = "Table:"
+        return "\n".join(lines).strip()
+
+    pipe_lines = [line for line in lines if "|" in line]
+    pipe_count = cleaned.count("|")
+    looks_table_like = len(pipe_lines) >= 2 or pipe_count >= 6
+    if not looks_table_like:
+        return cleaned
+
+    first_pipe_idx = next((idx for idx, line in enumerate(lines) if "|" in line), 0)
+    prefix_lines = lines[:first_pipe_idx]
+    table_lines = lines[first_pipe_idx:] if first_pipe_idx < len(lines) else lines
+    out_lines = ["Table:"]
+    if prefix_lines:
+        # Keep pre-table context as a caption row so no information is lost.
+        out_lines.append(" | ".join(prefix_lines))
+    out_lines.extend(table_lines)
+    return "\n".join(out_lines).strip()
+
+
 def _merge_tiny_chunk_texts(chunk_texts: list[str], *, min_tokens: int, max_tokens: int) -> list[str]:
     if not chunk_texts:
         return []
@@ -584,6 +601,34 @@ def _merge_tiny_chunk_texts(chunk_texts: list[str], *, min_tokens: int, max_toke
         out.append(chunk)
         idx += 1
     return out
+
+
+def _final_tiny_chunk_sweep(chunk_rows: list[dict[str, Any]], *, max_tokens: int, sweep_tokens: int) -> list[dict[str, Any]]:
+    service = TinyChunkSweepService(
+        max_tokens=max_tokens,
+        sweep_tokens=sweep_tokens,
+        count_tokens=count_tokens,
+        looks_structural_stub=lambda text, token_count: _looks_structural_stub(text, token_count=token_count),
+        compatible_chunk_structure=lambda row, section, article, subarticle: _compatible_chunk_structure(
+            row,
+            section=section,
+            article=article,
+            subarticle=subarticle,
+        ),
+        merge_page_ref_payload=_merge_page_ref_payload,
+        build_augmented_text=lambda text, name, year, brief_description, section, article, subarticle: build_augmented_text(
+            text,
+            name=name,
+            year=year,
+            brief_description=brief_description,
+            section=section,
+            article=article,
+            subarticle=subarticle,
+        ),
+        sha1_func=_sha1,
+        is_table_chunk_text=_is_table_chunk_text,
+    )
+    return service.sweep(chunk_rows)
 
 
 def _is_toc_segment(segment: Segment) -> bool:
@@ -812,6 +857,17 @@ def _chunk_segment_texts(text: str, *, target_tokens: int, max_tokens: int, over
             if text_chunk.strip():
                 chunk_pairs.append(("text", text_chunk))
 
+    def normalize_pairs(pairs: list[tuple[str, str]]) -> list[tuple[str, str]]:
+        normalized: list[tuple[str, str]] = []
+        for chunk_kind, chunk_text in pairs:
+            normalized_text = _normalize_table_chunk_text(chunk_text)
+            if not normalized_text:
+                continue
+            normalized_kind = "table" if _is_table_chunk_text(normalized_text) else chunk_kind
+            normalized.append((normalized_kind, normalized_text))
+        return normalized
+
+    chunk_pairs = normalize_pairs(chunk_pairs)
     chunks = [chunk_text for _, chunk_text in chunk_pairs]
 
     if len(chunks) <= 1:
@@ -838,6 +894,7 @@ def _chunk_segment_texts(text: str, *, target_tokens: int, max_tokens: int, over
             overlap_tokens=safe_overlap,
         )
         fixed_pairs.extend((chunk_kind, split_chunk) for split_chunk in split_chunks if split_chunk.strip())
+    fixed_pairs = normalize_pairs(fixed_pairs)
     return [chunk_text for _, chunk_text in fixed_pairs]
 
 
@@ -981,6 +1038,12 @@ def _process_document_folder(folder: Path, config: PipelineConfig) -> tuple[dict
                 seen_chunk_texts.add(chunk_text)
             chunk_index += 1
 
+    chunk_rows = _final_tiny_chunk_sweep(
+        chunk_rows,
+        max_tokens=config.max_tokens,
+        sweep_tokens=FINAL_TINY_CHUNK_TOKEN_THRESHOLD,
+    )
+
     pages = sorted(
         {
             page_ref["page_idx"]
@@ -1022,23 +1085,74 @@ def _process_document_folder(folder: Path, config: PipelineConfig) -> tuple[dict
 
 def run_pipeline(config: PipelineConfig) -> dict:
     folders = discover_document_folders(config.input_dir)
+    cache_service = IncrementalCacheService(
+        output_dir=config.output_dir,
+        sha1_func=_sha1,
+        read_json=read_json,
+        version=2,
+    )
+    snapshot = cache_service.load_snapshot()
+    current_signature = cache_service.processing_signature(config)
+    dedupe_service = GlobalChunkDedupeService(sha1_func=_sha1)
     documents: list[dict] = []
     chunks: list[dict] = []
     errors: list[dict] = []
     doc_results: list[dict] = []
+    reusable_hashes: dict[str, dict[str, str]] = {}
+    reused_documents = 0
+    processed_documents = 0
 
     for folder in folders:
+        source_folder = str(folder.resolve())
+        doc_id = _sha1(source_folder)[:16]
+        folder_hash = cache_service.compute_folder_hash(folder)
+        if config.incremental and cache_service.can_reuse(
+            doc_id=doc_id,
+            folder_hash=folder_hash,
+            processing_signature=current_signature,
+            snapshot=snapshot,
+        ):
+            document_row = snapshot.docs_by_id[doc_id]
+            chunk_rows = snapshot.chunks_by_doc.get(doc_id, [])
+            documents.append(document_row)
+            chunks.extend(chunk_rows)
+            doc_results.append(
+                {
+                    "doc_id": doc_id,
+                    "source_folder": source_folder,
+                    "source_mode_used": document_row.get("source_mode_used", "unknown"),
+                    "fallback_reason": "incremental reuse",
+                    "warnings": [],
+                    "reused": True,
+                }
+            )
+            reusable_hashes[doc_id] = cache_service.build_entry(
+                source_folder=source_folder,
+                folder_hash=folder_hash,
+                processing_signature=current_signature,
+            )
+            reused_documents += 1
+            continue
         try:
             document_row, chunk_rows, doc_manifest = _process_document_folder(folder, config)
             documents.append(document_row)
             chunks.extend(chunk_rows)
             doc_results.append(doc_manifest)
+            reusable_hashes[str(document_row.get("doc_id", doc_id))] = cache_service.build_entry(
+                source_folder=source_folder,
+                folder_hash=folder_hash,
+                processing_signature=current_signature,
+            )
+            processed_documents += 1
         except Exception as exc:  # pylint: disable=broad-exception-caught
             error_row = {"source_folder": str(folder.resolve()), "error": str(exc)}
             errors.append(error_row)
             print(f"[rag-chunker] Failed to process {folder.name}: {exc}", file=sys.stderr)
             if config.fail_fast:
                 raise
+
+    if config.dedupe_chunks:
+        chunks = dedupe_service.apply(chunks, documents)
 
     output_dir = config.output_dir
     write_jsonl(output_dir / "documents.jsonl", documents)
@@ -1056,8 +1170,18 @@ def run_pipeline(config: PipelineConfig) -> dict:
         "documents": len(documents),
         "chunks": len(chunks),
         "source_modes": source_mode_counts,
+        "incremental": {
+            "enabled": config.incremental,
+            "processed_documents": processed_documents,
+            "reused_documents": reused_documents,
+        },
         "document_results": doc_results,
         "errors": errors,
     }
     write_json(output_dir / "run_manifest.json", manifest)
+    cache_service.write_cache(
+        generated_at_utc=manifest["processed_at_utc"],
+        entries=reusable_hashes,
+        write_json=write_json,
+    )
     return manifest

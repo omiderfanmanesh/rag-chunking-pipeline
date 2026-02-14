@@ -1,0 +1,39 @@
+{
+  "summary": {
+    "chunks": 1788,
+    "eval_report_overall_status": "excellent",
+    "gates_passed": true
+  },
+  "metrics": {
+    "tiny_chunk_pct": 0.34,
+    "duplicate_instance_pct": 0.0,
+    "overlap_p95_chars": 0.0,
+    "missing_required_metadata_pct": 0.0
+  },
+  "checks": [
+    {
+      "name": "tiny_chunk_pct",
+      "actual": 0.34,
+      "expected_max": 1.0,
+      "passed": true
+    },
+    {
+      "name": "duplicate_instance_pct",
+      "actual": 0.0,
+      "expected_max": 0.0,
+      "passed": true
+    },
+    {
+      "name": "overlap_p95_chars",
+      "actual": 0.0,
+      "expected_max": 30.0,
+      "passed": true
+    },
+    {
+      "name": "missing_required_metadata_pct",
+      "actual": 0.0,
+      "expected_max": 0.0,
+      "passed": true
+    }
+  ]
+}

@@ -61,7 +61,8 @@ jobs:
             --artifacts-dir artifacts-ci \
             --eval-report artifacts-ci/eval_report.json \
             --output-json artifacts-ci/deepeval_gate_report.json \
-            --max-overlap-p95-chars 50 \
+            --max-overlap-p95-chars 30 \
+            --max-tiny-chunk-pct 1.0 \
             --max-duplicate-instance-pct 0 \
             --max-missing-metadata-pct 0 \
             --fail-on-threshold

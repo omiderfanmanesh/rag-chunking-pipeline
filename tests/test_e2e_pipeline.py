@@ -1,6 +1,7 @@
 import json
 
 from rag_chunker.pipeline import PipelineConfig, run_pipeline
+import rag_chunker.pipeline as pipeline_module
 
 
 def test_e2e_pipeline_with_fallbacks(tmp_path):
@@ -117,3 +118,112 @@ def test_pipeline_drops_toc_and_dedupes_exact_text(tmp_path, monkeypatch):
     assert all("TABLE OF CONTENTS" not in row.get("text", "") for row in chunks)
     assert len(chunks) == 1
     assert chunks[0]["text"] == "Duplicate chunk text with enough tokens to remain in output after filtering."
+
+
+def test_pipeline_dedupes_across_documents(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+
+    doc_one = data_dir / "DocD.pdf-44444444-4444-4444-4444-444444444444"
+    doc_one.mkdir()
+    (doc_one / "DocD.md").write_text(
+        "# ART. 1 Intro\n"
+        "doc-one-marker\n"
+        "Body paragraph that will be replaced by a deterministic test chunk.\n",
+        encoding="utf-8",
+    )
+
+    doc_two = data_dir / "DocE.pdf-55555555-5555-5555-5555-555555555555"
+    doc_two.mkdir()
+    (doc_two / "DocE.md").write_text(
+        "# ART. 1 Intro\n"
+        "doc-two-marker\n"
+        "Another body paragraph that will be replaced by the same normalized chunk.\n",
+        encoding="utf-8",
+    )
+
+    base_text = (
+        "Shared policy paragraph with enough tokens to survive filtering and remain in output "
+        "after chunking across both documents."
+    )
+
+    def fake_chunk_segment_texts(text, **_kwargs):
+        if "doc-two-marker" in text:
+            return [f"  Shared policy paragraph with enough tokens   to survive filtering and remain in output after chunking across both documents.  "]
+        return [base_text]
+
+    monkeypatch.setattr("rag_chunker.pipeline._chunk_segment_texts", fake_chunk_segment_texts)
+
+    output_dir = tmp_path / "artifacts"
+    manifest = run_pipeline(PipelineConfig(input_dir=data_dir, output_dir=output_dir, min_chunk_tokens=1))
+    assert manifest["documents"] == 2
+    assert manifest["chunks"] == 1
+
+    chunks = [json.loads(line) for line in (output_dir / "chunks.jsonl").read_text(encoding="utf-8").splitlines() if line]
+    assert len(chunks) == 1
+
+    documents = [json.loads(line) for line in (output_dir / "documents.jsonl").read_text(encoding="utf-8").splitlines() if line]
+    chunk_counts = sorted(doc["stats"]["chunks"] for doc in documents)
+    assert chunk_counts == [0, 1]
+
+
+def test_pipeline_incremental_reuses_unchanged_documents(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    doc = data_dir / "DocF.pdf-66666666-6666-6666-6666-666666666666"
+    doc.mkdir()
+    (doc / "DocF.md").write_text(
+        "# ART. 1 Intro\n"
+        "This document should be reused without reprocessing on the second run.\n",
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "artifacts"
+
+    first = run_pipeline(PipelineConfig(input_dir=data_dir, output_dir=output_dir))
+    assert first["incremental"]["processed_documents"] == 1
+    assert first["incremental"]["reused_documents"] == 0
+
+    monkeypatch.setattr(
+        "rag_chunker.pipeline._process_document_folder",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("should not reprocess unchanged docs")),
+    )
+    second = run_pipeline(PipelineConfig(input_dir=data_dir, output_dir=output_dir))
+    assert second["documents"] == 1
+    assert second["errors"] == []
+    assert second["incremental"]["processed_documents"] == 0
+    assert second["incremental"]["reused_documents"] == 1
+
+
+def test_pipeline_incremental_reprocesses_changed_document(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    doc = data_dir / "DocG.pdf-77777777-7777-7777-7777-777777777777"
+    doc.mkdir()
+    md_path = doc / "DocG.md"
+    md_path.write_text(
+        "# ART. 1 Intro\n"
+        "First version.\n",
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "artifacts"
+    run_pipeline(PipelineConfig(input_dir=data_dir, output_dir=output_dir))
+
+    md_path.write_text(
+        "# ART. 1 Intro\n"
+        "Second version changed.\n",
+        encoding="utf-8",
+    )
+
+    calls = {"count": 0}
+    original = pipeline_module._process_document_folder
+
+    def wrapped(folder, config):
+        calls["count"] += 1
+        return original(folder, config)
+
+    monkeypatch.setattr("rag_chunker.pipeline._process_document_folder", wrapped)
+    second = run_pipeline(PipelineConfig(input_dir=data_dir, output_dir=output_dir))
+    assert second["errors"] == []
+    assert calls["count"] == 1
+    assert second["incremental"]["processed_documents"] == 1
+    assert second["incremental"]["reused_documents"] == 0

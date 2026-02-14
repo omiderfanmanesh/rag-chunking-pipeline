@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "generated_at_utc": "2026-02-14T10:41:40.687038+00:00",
+  "documents": {
+    "1e162e0a730f4193": {
+      "source_folder": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/ARDiSFriuli‑VeneziaGiulia-2025-2026.pdf-2b6c96b2-42d6-452c-af45-7b2ee57d32ea",
+      "content_hash": "ae17aea351d1c313d3e1cb18d452aa6ffc021cd8",
+      "processing_signature": "a7929b0c69b086932f73a1ad5bd77eb135d5226d"
+    },
+    "557c2c9e16696227": {
+      "source_folder": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/BANDO-DIRITTO-ALLO-STUDIO-25-26_ENG-compresso-alta.pdf-3dc07ebf-e7af-42e2-953e-d27a4d001dc3",
+      "content_hash": "fff611b6ee2a146f4a63fb1cad29f804a80f1b1c",
+      "processing_signature": "a7929b0c69b086932f73a1ad5bd77eb135d5226d"
+    },
+    "b49ec96ec1b6adc3": {
+      "source_folder": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/Call for the benefits of the right to education a.y. 2025:2026 – UniMI Bicocca (ENG)-bando-DSU-2025-26 eng.pdf-b1f73bba-3d68-4f92-a375-851a8b0ea425",
+      "content_hash": "a5e99025a624f919ae4d3744fd7cbbb42e7268ef",
+      "processing_signature": "a7929b0c69b086932f73a1ad5bd77eb135d5226d"
+    },
+    "33a5a24b4b3c980d": {
+      "source_folder": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/Call_DSU_CALLFORAPPLICATIONSFORASSIGNMENTOFFINANCIALAIDBENEFITS2025-2026-eng.pdf-9a8fbf6a-a1d6-436e-9e6a-4d660d1a80db",
+      "content_hash": "5e1b55cefce64f6623c60cccdc12195fdbd5122d",
+      "processing_signature": "a7929b0c69b086932f73a1ad5bd77eb135d5226d"
+    },
+    "27a41da36fb5ff11": {
+      "source_folder": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/Competition announcement for the award of scholarships and accommodation a.y. 2025:2026 – DSU Toscana(ENG).pdf-04752559-4441-4585-ae66-3b526d813297",
+      "content_hash": "b08bd52e9be531f57a6ca6c8cbb63c1cf8e105d1",
+      "processing_signature": "a7929b0c69b086932f73a1ad5bd77eb135d5226d"
+    },
+    "984ed7cb5e1ecd8a": {
+      "source_folder": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/EDiSU_Pavia_(Lombardia)_BANDO-BORSE-25_26-post-DGR_agg-27-08-2025.pdf-646f844c-2da0-4f6a-b456-a6d5bb028fd3",
+      "content_hash": "371c35dcdedf548d9350978eef0b25d01b2d1a8e",
+      "processing_signature": "a7929b0c69b086932f73a1ad5bd77eb135d5226d"
+    },
+    "bac4123a68ca13a1": {
+      "source_folder": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/LIGURIA_BANDO_DI_CONCORSO_PER_ATTRIBUZIONE_DI_BENEFICI_ANNO_ACCADEMICO_2025_2026.pdf-dab41de3-a3b7-4bea-97bc-da28fdf640f0",
+      "content_hash": "91620b65ba6ba1beef85c0f90a7437ed545055f3",
+      "processing_signature": "a7929b0c69b086932f73a1ad5bd77eb135d5226d"
+    },
+    "c84f05ba69b70685": {
+      "source_folder": "/Users/omiderfanmanesh/Projects/rag-chunking-pipeline/data/NOTICE OF COMPETITION SCHOLARSHIP, ACCOMMODATION AND DEGREE AWARD A.Y. 2025-26.pdf-88b5c25b-2939-497f-a9f2-1d9e8f5f71aa",
+      "content_hash": "f6248dab179d2d5de6c062cd6b7911538b41e8a7",
+      "processing_signature": "a7929b0c69b086932f73a1ad5bd77eb135d5226d"
+    }
+  }
+}

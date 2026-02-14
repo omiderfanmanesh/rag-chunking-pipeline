@@ -1,5 +1,12 @@
-from rag_chunker.chunking import build_segments, count_tokens, split_text_by_tokens
-from rag_chunker.models import CanonicalBlock, PageRef
+from rag_chunker import build_segments, count_tokens, split_text_by_tokens, CanonicalBlock, PageRef
+
+
+def _max_suffix_prefix_overlap(left: str, right: str) -> int:
+    max_len = min(len(left), len(right))
+    for overlap in range(max_len, 0, -1):
+        if left[-overlap:] == right[:overlap]:
+            return overlap
+    return 0
 
 
 def test_build_segments_respects_article_boundaries():
@@ -32,3 +39,24 @@ def test_split_text_by_tokens_prefers_sentence_boundaries():
     # Most chunk starts should not be obvious sentence fragments.
     fragment_starts = sum(1 for chunk in chunks[1:] if chunk[0].islower())
     assert fragment_starts <= 1
+
+
+def test_split_text_by_tokens_caps_consecutive_overlap_chars():
+    text = " ".join(
+        f"Sentence {idx} has a unique marker token U{idx} and enough words to exercise overlap limits."
+        for idx in range(360)
+    )
+    chunks = split_text_by_tokens(text, target_tokens=80, max_tokens=100, overlap_tokens=30)
+    assert len(chunks) > 2
+    overlaps = [_max_suffix_prefix_overlap(chunks[idx - 1], chunks[idx]) for idx in range(1, len(chunks))]
+    assert max(overlaps) <= 30
+
+
+def test_split_text_by_tokens_overlap_trim_prefers_sentence_break():
+    sentence_a = "Students must submit complete documentation before the stated deadline."
+    sentence_b = "Late applications are rejected automatically by the admissions office."
+    text = " ".join(([sentence_a, sentence_b] * 120))
+    chunks = split_text_by_tokens(text, target_tokens=90, max_tokens=110, overlap_tokens=35)
+    assert len(chunks) > 2
+    starts = [chunk.lstrip()[:1] for chunk in chunks[1:]]
+    assert sum(1 for ch in starts if ch and ch.islower()) <= 1

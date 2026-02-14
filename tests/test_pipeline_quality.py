@@ -1,7 +1,8 @@
-from rag_chunker.models import PageRef, Segment
+from rag_chunker import PageRef, Segment
 from rag_chunker.pipeline import (
     _article_from_section_label,
     _chunk_segment_texts,
+    _final_tiny_chunk_sweep,
     _looks_structural_stub,
     _is_toc_segment,
     _merge_tiny_chunk_texts,
@@ -78,6 +79,23 @@ def test_chunk_segment_texts_strips_orphan_table_prefix_for_prose():
     assert chunks[0].startswith("For grant recipients")
 
 
+def test_chunk_segment_texts_normalizes_pipe_table_without_prefix():
+    text = "Benefit | Date\nAccommodation place | 29 July 2025\nScholarship publication | 8 August 2025"
+    chunks = _chunk_segment_texts(text, target_tokens=80, max_tokens=120, overlap_tokens=20, min_chars=30)
+    assert chunks
+    assert chunks[0].startswith("Table:")
+    assert "Benefit | Date" in chunks[0]
+
+
+def test_chunk_segment_texts_normalizes_pipe_table_with_caption_context():
+    text = "Contacts - Udine Office\nService | Phone\nScholarship | 0432 245772"
+    chunks = _chunk_segment_texts(text, target_tokens=80, max_tokens=120, overlap_tokens=20, min_chars=30)
+    assert chunks
+    assert chunks[0].startswith("Table:")
+    assert "Contacts - Udine Office" in chunks[0]
+    assert "Service | Phone" in chunks[0]
+
+
 def test_page_meta_uses_one_based_page_numbers():
     page_start, page_end, refs = _page_meta([PageRef(0), PageRef(2)])
     assert page_start == 1
@@ -143,6 +161,159 @@ def test_merge_tiny_chunk_texts_does_not_merge_table_into_plain_text():
         max_tokens=120,
     )
     assert len(merged) == 2
+
+
+def test_final_tiny_chunk_sweep_merges_small_row_into_previous_when_compatible():
+    rows = [
+        {
+            "chunk_id": "c1",
+            "doc_id": "d1",
+            "chunk_index": 0,
+            "text": "This is a substantial chunk with enough context and content to remain as the main paragraph.",
+            "token_count": 30,
+            "char_count": 95,
+            "page_refs": [{"page_idx": 1}],
+            "page_start": 1,
+            "page_end": 1,
+            "metadata": {
+                "year": "2025-2026",
+                "name": "Doc One",
+                "brief_description": "Desc",
+                "section": "SECTION I",
+                "article": "1",
+                "subarticle": None,
+                "language_hint": "en",
+            },
+            "augmented_text": "",
+        },
+        {
+            "chunk_id": "c2",
+            "doc_id": "d1",
+            "chunk_index": 1,
+            "text": "tiny tail",
+            "token_count": 3,
+            "char_count": 9,
+            "page_refs": [{"page_idx": 2}],
+            "page_start": 2,
+            "page_end": 2,
+            "metadata": {
+                "year": "2025-2026",
+                "name": "Doc One",
+                "brief_description": "Desc",
+                "section": "SECTION I",
+                "article": "1",
+                "subarticle": None,
+                "language_hint": "en",
+            },
+            "augmented_text": "",
+        },
+    ]
+    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20)
+    assert len(swept) == 1
+    assert "tiny tail" in swept[0]["text"]
+    assert swept[0]["page_start"] == 1
+    assert swept[0]["page_end"] == 2
+
+
+def test_final_tiny_chunk_sweep_drops_structural_stub():
+    rows = [
+        {
+            "chunk_id": "c1",
+            "doc_id": "d1",
+            "chunk_index": 0,
+            "text": "Article 3 Appeals 9",
+            "token_count": 4,
+            "char_count": 19,
+            "page_refs": [{"page_idx": 1}],
+            "page_start": 1,
+            "page_end": 1,
+            "metadata": {
+                "year": "2025-2026",
+                "name": "Doc One",
+                "brief_description": "Desc",
+                "section": "SECTION I",
+                "article": "3",
+                "subarticle": None,
+                "language_hint": "en",
+            },
+            "augmented_text": "",
+        },
+        {
+            "chunk_id": "c2",
+            "doc_id": "d1",
+            "chunk_index": 1,
+            "text": "This is the substantive article body with enough information to remain in the final output.",
+            "token_count": 28,
+            "char_count": 95,
+            "page_refs": [{"page_idx": 2}],
+            "page_start": 2,
+            "page_end": 2,
+            "metadata": {
+                "year": "2025-2026",
+                "name": "Doc One",
+                "brief_description": "Desc",
+                "section": "SECTION I",
+                "article": "3",
+                "subarticle": None,
+                "language_hint": "en",
+            },
+            "augmented_text": "",
+        },
+    ]
+    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20)
+    assert len(swept) == 1
+    assert "substantive article body" in swept[0]["text"]
+
+
+def test_final_tiny_chunk_sweep_does_not_merge_tiny_table_into_prose():
+    rows = [
+        {
+            "chunk_id": "c1",
+            "doc_id": "d1",
+            "chunk_index": 0,
+            "text": "Narrative chunk with enough context and details to remain separate from tables.",
+            "token_count": 24,
+            "char_count": 77,
+            "page_refs": [{"page_idx": 1}],
+            "page_start": 1,
+            "page_end": 1,
+            "metadata": {
+                "year": "2025-2026",
+                "name": "Doc One",
+                "brief_description": "Desc",
+                "section": "SECTION I",
+                "article": "1",
+                "subarticle": None,
+                "language_hint": "en",
+            },
+            "augmented_text": "",
+        },
+        {
+            "chunk_id": "c2",
+            "doc_id": "d1",
+            "chunk_index": 1,
+            "text": "Table:\nA | 1",
+            "token_count": 6,
+            "char_count": 12,
+            "page_refs": [{"page_idx": 1}],
+            "page_start": 1,
+            "page_end": 1,
+            "metadata": {
+                "year": "2025-2026",
+                "name": "Doc One",
+                "brief_description": "Desc",
+                "section": "SECTION I",
+                "article": "1",
+                "subarticle": None,
+                "language_hint": "en",
+            },
+            "augmented_text": "",
+        },
+    ]
+    swept = _final_tiny_chunk_sweep(rows, max_tokens=120, sweep_tokens=20)
+    assert len(swept) == 2
+    assert swept[0]["text"].startswith("Narrative chunk")
+    assert swept[1]["text"].startswith("Table:")
 
 
 def test_is_toc_segment_detects_numbered_outline_entries():

@@ -1,4 +1,4 @@
-from rag_chunker.augment import build_augmented_text
+from rag_chunker import build_augmented_text
 
 
 def test_build_augmented_text_omits_empty_metadata_fields():

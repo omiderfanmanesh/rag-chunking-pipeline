@@ -1,6 +1,4 @@
-from rag_chunker.metadata import extract_year, update_structure_state
-from rag_chunker.models import CanonicalBlock
-from rag_chunker.metadata import extract_brief_description, extract_document_name
+from rag_chunker import extract_year, update_structure_state, CanonicalBlock, extract_brief_description, extract_document_name
 
 
 def test_extract_year_variants():

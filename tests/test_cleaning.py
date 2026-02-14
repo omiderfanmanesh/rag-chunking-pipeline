@@ -1,4 +1,4 @@
-from rag_chunker.cleaning import clean_text, flatten_html_table, normalize_inline_math
+from rag_chunker import clean_text, flatten_html_table, normalize_inline_math
 
 
 def test_flatten_html_table():

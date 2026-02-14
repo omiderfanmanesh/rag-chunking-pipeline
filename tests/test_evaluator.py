@@ -1,6 +1,6 @@
 import json
 
-from rag_chunker.evaluator import EvalConfig, run_evaluation
+from rag_chunker import EvalConfig, run_evaluation
 
 
 def _write_jsonl(path, rows):

@@ -1,17 +1,17 @@
 {
   "summary": {
     "documents": 8,
-    "chunks": 1789,
+    "chunks": 1788,
     "source_modes": {
       "block_list": 7,
       "content_list": 1
     },
-    "overall_score": 99.95,
+    "overall_score": 99.94,
     "overall_status": "excellent"
   },
   "dimensions": {
     "size": {
-      "score": 99.83,
+      "score": 99.8,
       "status": "excellent"
     },
     "cleanliness": {
@@ -31,26 +31,26 @@
     "token_stats": {
       "min": 14,
       "median": 124.0,
-      "p95": 453.0,
+      "p95": 454.0,
       "max": 520,
-      "avg": 170.25
+      "avg": 169.86
     },
     "char_stats": {
       "min": 45,
-      "median": 527.0,
-      "p95": 2066.0,
+      "median": 520.0,
+      "p95": 2079.0,
       "max": 2612,
-      "avg": 729.01
+      "avg": 726.94
     },
     "small_chunks": {
       "threshold": 20,
-      "count": 5,
-      "pct": 0.28
+      "count": 6,
+      "pct": 0.34
     },
     "moderate_chunks": {
       "threshold": 50,
-      "count": 265,
-      "pct": 14.81
+      "count": 266,
+      "pct": 14.88
     },
     "oversized_chunks": {
       "max_tokens": 520,
@@ -58,8 +58,8 @@
       "pct": 0.0
     },
     "in_target_range": {
-      "count": 1784,
-      "pct": 99.72
+      "count": 1782,
+      "pct": 99.66
     },
     "duplicates": {
       "duplicate_instances": 0,
@@ -91,7 +91,7 @@
       },
       "subarticle_missing": {
         "count": 1065,
-        "pct": 59.53
+        "pct": 59.56
       },
       "language_missing": {
         "count": 0,
@@ -171,6 +171,15 @@
     "oversized_chunks": [],
     "small_chunks": [
       {
+        "chunk_id": "9048049ad785f572c899",
+        "doc_id": "b49ec96ec1b6adc3",
+        "chunk_index": 17,
+        "token_count": 17,
+        "page_start": 6,
+        "page_end": 7,
+        "text_preview": "3. EXCLUSIVE COURT 35  GENERAL NOTES 36  DEADLINES"
+      },
+      {
         "chunk_id": "8af2be4fa30ebb6371b9",
         "doc_id": "b49ec96ec1b6adc3",
         "chunk_index": 24,
@@ -236,18 +245,18 @@
         "text_preview": "# Art.44 Scholarship allocation deadlines  Subject to any administrative barriers and the availability of funds, the scholarships will be paid to beneficiary students as follows:  - The first instalment of the grant, i.e"
       },
       {
-        "chunk_id": "ac1925824c171a0c40a3",
+        "chunk_id": "57a73dfdfa74b6c5093f",
         "doc_id": "c84f05ba69b70685",
-        "chunk_index": 156,
+        "chunk_index": 155,
         "token_count": 434,
         "page_start": 47,
         "page_end": 47,
         "text_preview": "Art. 13(2) 20% INCREASE OF GRANT AMOUNT FOR SECOND-COURSE ENROLMENT  Art. 6 of Ministerial Decree 1320/2022 provides that students enrolled at the same time in more than one course are allowed to obtain and keep the scho"
       },
       {
-        "chunk_id": "7c125045248989f0e9d9",
+        "chunk_id": "9379b2d07b5e5184df77",
         "doc_id": "c84f05ba69b70685",
-        "chunk_index": 210,
+        "chunk_index": 209,
         "token_count": 360,
         "page_start": 61,
         "page_end": 62,
@@ -258,7 +267,7 @@
   },
   "manifest_echo": {
     "documents": 8,
-    "chunks": 1789,
+    "chunks": 1788,
     "errors": [],
     "source_modes": {
       "block_list": 7,
@@ -276,7 +285,7 @@
       },
       {
         "name": "small_chunks_pct",
-        "actual": 0.28,
+        "actual": 0.34,
         "expected": "<= 12.0",
         "passed": true
       },
